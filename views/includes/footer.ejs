@@ -1,0 +1,60 @@
+<footer class="footer mt-auto py-4" style="background: #f3f4f6; color: #232526;">
+    <div class="container">
+        <div class="row align-items-center">
+            <!-- Company Name with Bootstrap Icon (centered on all screens) -->
+            <div class="col-12 mb-3 d-flex justify-content-center align-items-center">
+                <div class="fw-bold fs-4 d-flex align-items-center gap-2">
+                    <i class="bi bi-globe-americas fs-3" aria-label="Wanderlust Logo"></i>
+                    Wanderlust Private Limited
+                </div>
+            </div>
+            <!-- Footer Links (centered on all screens) -->
+            <div class="col-12 col-md-6 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
+                <div class="d-flex gap-3 f-info-links">
+                    <a href="/about" class="text-dark text-decoration-none">About</a>
+                    <a href="/contact" class="text-dark text-decoration-none">Contact</a>
+                    <a href="/privacy" class="text-dark text-decoration-none">Privacy & Policy</a>
+                </div>
+            </div>
+            <!-- Social Icons (centered on all screens) -->
+            <div class="col-12 col-md-6 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
+                <div class="d-flex gap-3 f-info-socials">
+                    <a href="https://instagram.com" target="_blank" class="text-dark fs-4" aria-label="Instagram"><i class="fa-brands fa-square-instagram"></i></a>
+                    <a href="https://facebook.com" target="_blank" class="text-dark fs-4" aria-label="Facebook"><i class="fa-brands fa-square-facebook"></i></a>
+                    <a href="https://twitter.com" target="_blank" class="text-dark fs-4" aria-label="Twitter"><i class="fa-brands fa-square-twitter"></i></a>
+                    <a href="https://linkedin.com" target="_blank" class="text-dark fs-4" aria-label="LinkedIn"><i class="fa-brands fa-square-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+        <hr class="border-secondary my-3">
+        <div class="row">
+            <div class="col text-center f-info-copyright">
+                <small>&copy; <%= new Date().getFullYear() %> Wanderlust. All rights reserved.</small>
+            </div>
+        </div>
+    </div>
+</footer>
+<style>
+    .footer a:hover {
+        color: #ffc107 !important;
+        text-decoration: underline;
+    }
+    .f-info-socials i {
+        transition: color 0.2s;
+    }
+    .f-info-socials i:hover {
+        color: #ffc107;
+    }
+    .footer {
+        background: #f3f4f6 !important; /* Off-white greyish background */
+        color: #232526 !important;
+    }
+    @media (max-width: 767.98px) {
+        .footer .row > div {
+            margin-bottom: 1rem;
+        }
+        .footer .row {
+            text-align: center;
+        }
+    }
+</style>

@@ -1,0 +1,203 @@
+<% layout('layouts/boilerplate') %>
+
+<body>
+    <!-- <h3>All Listings</h3> -->
+
+<!-- creating create route on main index.ejs page for to create new listings   -->
+     <!-- <form method ="GET" action="/listings/new">
+    <button>Create New Listing</button>
+    </form> -->
+
+    <style>
+        #filters{
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 10px;
+        }
+        .filter{
+            text-align: center;
+            margin-right: 2rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .filter i{  
+            font-size: 1.2rem;
+        }
+        .filter p{
+            font-size: 0.8rem;
+        }
+        .filter:hover{
+            opacity: 1;
+        }
+        .filter:hover i{
+            color: #000;
+        }
+        .tax-info{
+            display:none;
+
+        }
+        .tax-toggle{
+            border:1px solid black ;
+            border-radius:1rem;
+            height :3.25rem;
+            padding :1rem;
+            margin-left: 3rem;
+            display:flex;
+            align-items: center;
+        }
+    </style>
+    <div id="filters">
+        <div class="filter">
+            <i class="fa-solid fa-fire"></i>
+            <p>Trending</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-star"></i>
+            <p>Top Rated</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-location-dot"></i>
+            <p>Location</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-bed"></i>
+            <p>Bedrooms</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-mountain"></i>
+            <p>Mountains</p>
+        </div>
+        
+        <div class="filter">
+            <i class="fa-solid fa-water-ladder"></i>
+            <p>Amazing Pools</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-calendar-days"></i>
+            <p>Date</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-igloo"></i>
+            <p>Domes</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-snowflake"></i>
+            <p>Arctic </p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-campground"></i>
+            <p>Camping</p>
+        </div>
+        <div class="filter">
+            <i class="fa-solid fa-leaf"></i>
+            <p>Eco Friendly</p>
+        </div>
+        <div class="tax-toggle">
+            
+        <div class="form-check-reverse form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+            <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
+          </div>
+        </div>
+
+
+    </div>
+    <div class ="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+          <% if (allListings.length === 0) { %>
+            <div class="col-12 text-center mt-5">
+                <% if (searchQuery) { %>
+                    <div class="no-results">
+                        <i class="fa-solid fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3>No listings found</h3>
+                        <p class="text-muted">We couldn't find any listings matching "<%= searchQuery %>"</p>
+                        <div class="trending-searches mt-4">
+                            <h6 class="text-muted mb-3">Try these popular destinations:</h6>
+                            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                <a href="/listings?search=mountain" class="btn btn-outline-primary btn-sm">Mountain</a>
+                                <a href="/listings?search=beach" class="btn btn-outline-primary btn-sm">Beach</a>
+                                <a href="/listings?search=city" class="btn btn-outline-primary btn-sm">City</a>
+                                <a href="/listings?search=forest" class="btn btn-outline-primary btn-sm">Forest</a>
+                                <a href="/listings?search=lake" class="btn btn-outline-primary btn-sm">Lake</a>
+                            </div>
+                        </div>
+                        <a href="/listings" class="btn btn-dark mt-3">View All Listings</a>
+                    </div>
+                <% } else { %>
+                    <div class="no-listings">
+                        <i class="fa-solid fa-home" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
+                        <h3>No listings available</h3>
+                        <p class="text-muted">Be the first to create a listing!</p>
+                        <a href="/listings/new" class="btn btn-dark">Create Listing</a>
+                    </div>
+                <% } %>
+            </div>
+          <% } else { %>
+            <% if (searchQuery) { %>
+                <div class="col-12 mb-3">
+                    <div class="search-results-header">
+                        <h4>Search Results for "<%= searchQuery %>"</h4>
+                        <p><%= allListings.length %> listing(s) found</p>
+                    </div>
+                    
+                    <% if (searchHistory && searchHistory.length > 0) { %>
+                        <div class="search-suggestions mt-3">
+                            <h6 class="text-muted mb-2">Related searches:</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <% searchHistory.forEach(function(suggestion) { %>
+                                    <a href="/listings?search=<%= encodeURIComponent(suggestion) %>" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <%= suggestion %>
+                                    </a>
+                                <% }); %>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
+            <% for(let listing of allListings) { %>
+            <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
+    <div class="card col">
+    <img 
+        src="<%= listing.image.url %>" 
+        class="card-img-top" 
+        alt="listing_image" 
+        style="height: 200px; object-fit: cover;"
+        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'><rect width=\'200\' height=\'200\' fill=\'%23f8f9fa\'/><text x=\'100\' y=\'100\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%236c757d\' font-family=\'Arial, sans-serif\' font-size=\'14\'>No Image</text></svg>';">
+        <div class="card-img-overlay "></div>
+    <div class="card-body">
+        <h5 class="card-title"><%=listing.title%></h5>
+        <p class="card-text">
+            <%= listing.description %>
+            <br>
+            <strong>Price:</strong> &#8377; <%= listing.price.toLocaleString("en-IN") %> /night
+           
+            <i class="tax-info">&nbsp;&nbsp;+10%GST </i>
+            <br>
+            <strong>Location:</strong> <%= listing.location %>
+            <br>
+            <strong>Country:</strong> <%= listing.country %>
+        </p>
+        <!-- <a href="/listings" class="btn btn-primary"></a> -->
+    </div>
+</div>
+            </a>
+            <% } %>
+          <% } %>
+    </div>
+</body>
+
+<script>
+    let taxSwitch =document.getElementById("switchCheckDefault");
+    taxSwitch.addEventListener("click",()=>{
+   let taxInfo=document.getElementsByClassName("tax-info");
+   for (let info of taxInfo) {
+        if (taxSwitch.checked) {
+            info.style.display = "inline";
+        } else {
+            info.style.display = "none";
+        }
+   }
+    })
+</script>

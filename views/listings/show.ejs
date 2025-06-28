@@ -1,0 +1,95 @@
+<% layout('layouts/boilerplate') %>
+<div class="row mt-4">
+    <div class="col-md-8 offset-md-2">
+
+        <div class="card show-card p-4">
+
+            <h3 class="card-title mb-3"><%= listingDetails.title %></h3>
+
+            <img src="<%= listingDetails.image.url%>" 
+                 class="card-img-top show-img" 
+                 alt="Listing Image" 
+                 onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\' viewBox=\'0 0 400 300\'><rect width=\'400\' height=\'300\' fill=\'%23f8f9fa\'/><text x=\'200\' y=\'150\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%236c757d\' font-family=\'Arial, sans-serif\' font-size=\'16\'>No Image Available</text></svg>';" />
+
+            <div class="card-body px-0 pt-4">
+
+                <p>Owned by <b><%= listingDetails.owner && listingDetails.owner.username ? listingDetails.owner.username : "HARSH SHARMA" %></b></></p>
+
+                <p><%= listingDetails.description %></p>
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item fs-5">&#8377; <%= listingDetails.price.toLocaleString("en-IN") %></li>
+                    <li class="list-group-item"><%= listingDetails.location %></li>
+                    <li class="list-group-item"><%= listingDetails.country %></li>
+                </ul>
+                <% if (currentUser && listingDetails.owner && listingDetails.owner._id && listingDetails.owner._id.toString() === currentUser._id.toString()) { %>
+                <div class="btns-container">
+                    <a href="/listings/<%= listingDetails._id %>/edit" class="btn btn-dark">Edit Listing</a>
+
+                    <form method="POST" action="/listings/<%= listingDetails._id %>?_method=DELETE">
+                        <button class="btn btn-danger">Delete Listing</button>
+                    </form>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <hr class="review-hr">
+
+        <% if(currentUser) { %>
+        <div class="reviews-section">
+            <h4>Leave a Review</h4>
+            
+            <form action="/listings/<%= listingDetails._id %>/reviews" method="POST" class="needs-validation" novalidate>
+                <div class="mb-3 mt-3">
+                    <label for="rating" class="form-label">Rating</label>
+                    <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
+                </div>
+
+                <div class="mb-3">
+                    <label for="comment" class="form-label">Comments</label>
+                    <textarea id="comment" name="review[comment]" class="form-control" rows="4" required placeholder="Write your review here..."></textarea>
+                    <div class="invalid-feedback">
+                        Please write a comment.
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-dark mt-2 mb-3">Submit Review</button>
+            </form>
+        </div>
+        <hr/>
+        <% } %>
+       <h4 class="mb-4">All Reviews</h4>
+
+        <div class="row">
+        <% for (const review of listingDetails.reviews) { %>
+            <div class="card col-5 ms-3 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <% if (review.author && review.author.username) { %>
+                            @<%= review.author.username %>
+                        <% } else { %>
+                            <span class="text-muted">[deleted user]</span>
+                        <% } %>
+                    </h5>
+                    <p class="card-text">
+                        <% for(let i = 1; i <= 5; i++) { %>
+                            <% if (i <= review.rating) { %>
+                                <i class="fa-solid fa-star" style="color: gold;"></i>
+                            <% } else { %>
+                                <i class="fa-regular fa-star" style="color: gold;"></i>
+                            <% } %>
+                        <% } %>
+                    </p>
+                    <p class="card-text"><%= review.comment %></p>
+                </div>
+                <% if (currentUser && review.author._id.equals(currentUser._id)) { %>
+                <form action="/listings/<%= listingDetails._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mb-3">
+                    <button class="btn btn-sm btn-dark">Delete</button>
+                </form>
+                <% } %>
+            </div>
+        <% } %>
+        </div>
+    </div>
+</div>

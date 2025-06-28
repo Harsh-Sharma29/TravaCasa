@@ -1,0 +1,73 @@
+<% layout('layouts/boilerplate') %>
+<div class="row ">
+    <div class="col-8 offset-2">  
+        <div class="text-center mb-5">
+            <i class="fa-solid fa-pen-to-square" style="font-size: 2.5rem; color: #fe424d; margin-bottom: 0.5rem;"></i>
+            <h2 style="font-weight: 700; color: #222; letter-spacing: 1.5px; margin-top: 0.5rem;">
+                Edit Your Listing
+            </h2>
+            <p style="color: #888; font-size: 1.1rem; margin-top: 0.5rem;">
+                Update your listing details below to make it stand out!
+            </p>
+        </div>
+        <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" class="needs-validation" novalidate enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <input name="listing[title]" type="text" id="title" placeholder="Enter title" class="form-control" value="<%= listing.title %>" required>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload New Image:</label>
+                <input name="listing[image][url]" type="file" id="image" class="form-control">
+                <% if (listing.image && listing.image.url && !listing.image.url.startsWith('http')) { %>
+                    <div class="mt-2">
+                        <img src="<%= listing.image.url %>" alt="Current Image" class="current-image-preview">
+                        <div class="form-text">Current image. Upload a new file to replace.</div>
+                    </div>
+                <% } %>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="removeImage" name="removeImage">
+                    <label class="form-check-label" for="removeImage">
+                        Remove current image (will use default image)
+                    </label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <textarea name="listing[description]" id="description" placeholder="Description" class="form-control" required><%= listing.description %></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="mb-3 col-md-4">
+                    <label for="price" class="form-label">Price:</label>
+                    <input name="listing[price]" type="number" id="price" placeholder="Price" class="form-control" value="<%= listing.price %>" required>
+                    <div class="invalid-feedback">
+                        Price should be valid.
+                    </div>
+                </div>
+                <div class="mb-3 col-md-8">
+                    <label for="country" class="form-label">Country:</label>
+                    <input name="listing[country]" type="text" id="country" placeholder="Country" class="form-control" value="<%= listing.country %>" required>
+                    <div class="invalid-feedback">
+                        Please enter a valid country.
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="location" class="form-label">Location:</label>
+                <input name="listing[location]" type="text" id="location" placeholder="Location" class="form-control" value="<%= listing.location %>" required>
+                <div class="invalid-feedback">
+                    Please enter a valid location.
+                </div>
+            </div>
+            <button class="btn btn-dark edit-btn" >Edit</button>
+        </form>
+    </div>
+</div>
