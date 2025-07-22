@@ -1,60 +1,638 @@
-<footer class="footer mt-auto py-4" style="background: #f3f4f6; color: #232526;">
-    <div class="container">
-        <div class="row align-items-center">
-            <!-- Company Name with Bootstrap Icon (centered on all screens) -->
-            <div class="col-12 mb-3 d-flex justify-content-center align-items-center">
-                <div class="fw-bold fs-4 d-flex align-items-center gap-2">
-                    <i class="bi bi-globe-americas fs-3" aria-label="Wanderlust Logo"></i>
-                    Wanderlust Private Limited
-                </div>
-            </div>
-            <!-- Footer Links (centered on all screens) -->
-            <div class="col-12 col-md-6 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
-                <div class="d-flex gap-3 f-info-links">
-                    <a href="/about" class="text-dark text-decoration-none">About</a>
-                    <a href="/contact" class="text-dark text-decoration-none">Contact</a>
-                    <a href="/privacy" class="text-dark text-decoration-none">Privacy & Policy</a>
-                </div>
-            </div>
-            <!-- Social Icons (centered on all screens) -->
-            <div class="col-12 col-md-6 mb-3 mb-md-0 d-flex justify-content-center align-items-center">
-                <div class="d-flex gap-3 f-info-socials">
-                    <a href="https://instagram.com" target="_blank" class="text-dark fs-4" aria-label="Instagram"><i class="fa-brands fa-square-instagram"></i></a>
-                    <a href="https://facebook.com" target="_blank" class="text-dark fs-4" aria-label="Facebook"><i class="fa-brands fa-square-facebook"></i></a>
-                    <a href="https://twitter.com" target="_blank" class="text-dark fs-4" aria-label="Twitter"><i class="fa-brands fa-square-twitter"></i></a>
-                    <a href="https://linkedin.com" target="_blank" class="text-dark fs-4" aria-label="LinkedIn"><i class="fa-brands fa-square-linkedin"></i></a>
+<footer class="modern-footer" aria-label="Site footer">
+    <div class="footer-content">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <!-- Brand and Description Column -->
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <i class="fas fa-compass brand-icon"></i>
+                            <h5 class="brand-name">TravaCasa</h5>
+                        </div>
+                        <p class="brand-description">Your perfect stay awaits.<br>
+                             Find your dream retreat with TravaCasa.</p>
+                        <div class="social-links">
+                            <a href="https://instagram.com/travacasa" target="_blank" rel="noopener noreferrer" class="social-link instagram" aria-label="Follow us on Instagram">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://facebook.com/travacasa" target="_blank" rel="noopener noreferrer" class="social-link facebook" aria-label="Like us on Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="https://twitter.com/travacasa" target="_blank" rel="noopener noreferrer" class="social-link twitter" aria-label="Follow us on Twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Links Column -->
+                    <div class="footer-column">
+                        <h6 class="footer-title">Links</h6>
+                        <ul class="footer-links">
+                            <li><a href="listings" class="footer-link"><i class="fas fa-home"></i> Home</a></li>
+                            <li><a href="/listings" class="footer-link"><i class="fas fa-search"></i> Explore</a></li>
+                            <li><a href="/contact" class="footer-link"><i class="fas fa-envelope"></i> Contact</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Contact Info Column -->
+                    <div class="footer-column">
+                        <h6 class="footer-title">Contact</h6>
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>support@travacasa.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+91 70892 96426</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <hr class="border-secondary my-3">
-        <div class="row">
-            <div class="col text-center f-info-copyright">
-                <small>&copy; <%= new Date().getFullYear() %> Wanderlust. All rights reserved.</small>
+        
+        <!-- Bottom Section -->
+        <div class="footer-bottom">
+            <div class="container">
+                <div class="footer-bottom-content">
+                    <div class="footer-bottom-left">
+                        <p class="copyright">&copy; <%= new Date().getFullYear() %> TravaCasa. All rights reserved.</p>
+                        <p class="made-with-love">Made with <i class="fas fa-heart heart-icon"></i> for travelers worldwide</p>
+                    </div>
+                    <div class="footer-bottom-right">
+                        
+                        <div class="back-to-top">
+                            <button class="back-to-top-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Back to top">
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </footer>
+
 <style>
-    .footer a:hover {
-        color: #ffc107 !important;
-        text-decoration: underline;
+/* Enhanced Modern Footer Styles */
+.modern-footer {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    margin-top: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.modern-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 60%),
+        radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.footer-content {
+    position: relative;
+    z-index: 2;
+}
+
+.footer-top {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1.2fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-brand {
+    grid-column: 1 / span 2;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.brand-icon {
+    font-size: 2.5rem;
+    color: #ffc107;
+    animation: rotate 20s linear infinite;
+}
+
+.brand-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(135deg, #ffffff 0%, #ffc107 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brand-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.social-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.social-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.social-link:hover::before {
+    left: 100%;
+}
+
+.social-link:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.social-link.instagram:hover {
+    background: linear-gradient(45deg, #833ab4, #fd1d1d, #fcb045);
+    border-color: #E4405F;
+}
+
+.social-link.facebook:hover {
+    background: #1877F2;
+    border-color: #1877F2;
+}
+
+.social-link.twitter:hover {
+    background: #1DA1F2;
+    border-color: #1DA1F2;
+}
+
+.social-link.linkedin:hover {
+    background: #0A66C2;
+    border-color: #0A66C2;
+}
+
+.social-link.youtube:hover {
+    background: #FF0000;
+    border-color: #FF0000;
+}
+
+.social-link i {
+    font-size: 1.2rem;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.social-link:hover i {
+    transform: scale(1.2);
+}
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: white;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(135deg, #ffc107, #ff6b6b);
+    border-radius: 2px;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 0.75rem;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 0;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 107, 107, 0.2));
+    transition: width 0.3s ease;
+    z-index: -1;
+}
+
+.footer-link:hover::before {
+    width: 100%;
+}
+
+.footer-link:hover {
+    color: #ffc107;
+    transform: translateX(8px);
+    padding-left: 1rem;
+}
+
+.footer-link i {
+    font-size: 0.9rem;
+    width: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.footer-link:hover i {
+    color: #ffc107;
+    transform: scale(1.2);
+}
+
+.newsletter-column {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.newsletter-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.newsletter-form {
+    margin-bottom: 2rem;
+}
+
+.newsletter-input-group {
+    display: flex;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.newsletter-input-group:focus-within {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2);
+}
+
+.newsletter-input {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+}
+
+.newsletter-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletter-button {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #ffc107, #ff6b6b);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.newsletter-button:hover {
+    background: linear-gradient(135deg, #ff6b6b, #ffc107);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+}
+
+.newsletter-button i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.newsletter-button:hover i {
+    transform: translateX(3px);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    color: #ffc107;
+    transform: translateX(5px);
+}
+
+.contact-item i {
+    font-size: 1rem;
+    color: #ffc107;
+    width: 20px;
+    text-align: center;
+}
+
+.footer-bottom {
+    padding: 2rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.footer-bottom-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-bottom-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.copyright {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.made-with-love {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.heart-icon {
+    color: #ff6b6b;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+.footer-bottom-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.awards {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.award-badge {
+    background: linear-gradient(135deg, #ffc107, #ff6b6b);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.back-to-top-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.back-to-top-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.back-to-top-btn:hover::before {
+    left: 100%;
+}
+
+.back-to-top-btn:hover {
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.back-to-top-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.back-to-top-btn:hover i {
+    transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(255, 193, 7, 0.8); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 2rem;
     }
-    .f-info-socials i {
-        transition: color 0.2s;
+    
+    .footer-brand {
+        grid-column: 1 / -1;
+        text-align: center;
+        margin-bottom: 2rem;
     }
-    .f-info-socials i:hover {
-        color: #ffc107;
+    
+    .newsletter-column {
+        grid-column: 1 / -1;
+        margin-top: 2rem;
     }
-    .footer {
-        background: #f3f4f6 !important; /* Off-white greyish background */
-        color: #232526 !important;
+}
+
+@media (max-width: 768px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        text-align: center;
     }
-    @media (max-width: 767.98px) {
-        .footer .row > div {
-            margin-bottom: 1rem;
-        }
-        .footer .row {
-            text-align: center;
-        }
+    
+    .footer-brand {
+        grid-column: 1;
     }
+    
+    .social-links {
+        justify-content: center;
+    }
+    
+    .footer-bottom-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .footer-bottom-right {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .awards {
+        justify-content: center;
+    }
+    
+    .newsletter-input-group {
+        flex-direction: column;
+    }
+    
+    .newsletter-button {
+        justify-content: center;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .newsletter-input {
+        border-radius: 12px 12px 0 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-top {
+        padding: 2rem 0 1.5rem;
+    }
+    
+    .footer-bottom {
+        padding: 1.5rem 0;
+    }
+    
+    .brand-name {
+        font-size: 1.5rem;
+    }
+    
+    .brand-icon {
+        font-size: 2rem;
+    }
+    
+    .newsletter-column {
+        padding: 1.5rem;
+    }
+    
+    .social-links {
+        gap: 0.75rem;
+    }
+    
+    .social-link {
+        width: 40px;
+        height: 40px;
+    }
+}
 </style>

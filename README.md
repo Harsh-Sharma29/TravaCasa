@@ -1,77 +1,106 @@
-# Wanderlust - Listing Management System
+# TravaCasa AI Chatbot
 
-A Node.js application for managing property listings with image upload functionality.
+## Overview
+TravaCasa is a full-featured travel and accommodation platform powered by an advanced AI chatbot. Users can search, filter, and book vacation rentals, get travel advice, and interact with a smart assistant that answers any question—travel-related or general knowledge—using a locally hosted Llama2 model (with cloud fallback).
+
+---
 
 ## Features
+- **AI Chatbot (Llama2-powered):**
+  - Answers any question (travel, tech, science, general knowledge, etc.)
+  - Context-aware, multi-turn conversations
+  - Voice input, file upload, and quick actions
+  - Smart fallback to cloud AI if local model is unavailable
+- **Property Listings:**
+  - Responsive grid view with filters (category, location, type, price)
+  - “Near Me” feature using geolocation
+  - Detailed listing pages with reviews and image zoom
+- **User System:**
+  - Signup, login, and profile management
+  - Bookings, favorites, and user listings
+- **Modern UI:**
+  - Mobile-first, dark mode, smooth animations
+  - Accessible and keyboard-friendly
 
-- User authentication and authorization
-- Create, read, update, and delete listings
-- Image upload and management
-- Review system
-- Responsive design
+---
 
-## Image Upload Features
+## Tech Stack
+- **Frontend:** EJS, Bootstrap, Vanilla JS, CSS
+- **Backend:** Node.js, Express.js
+- **Database:** MongoDB (Mongoose)
+- **AI Integration:**
+  - Local: Llama2 via LangChain/Ollama (http://localhost:11434)
+  - Cloud fallback: Hugging Face (DialoGPT, Blenderbot)
+- **Other:**
+  - Multer (file uploads), Google Maps API (location/places), Passport.js (auth)
 
-### Supported Features
-- **File Upload**: Users can upload images when creating or editing listings
-- **File Validation**: Only image files are allowed (JPEG, PNG, GIF, etc.)
-- **File Size Limit**: Maximum 5MB per image
-- **Automatic File Management**: Old images are automatically deleted when replaced
-- **Fallback Images**: Default images are shown when no image is uploaded
-- **Error Handling**: Graceful error handling for upload failures
+---
 
-### Technical Details
-- **Storage**: Images are stored locally in `public/uploads/` directory
-- **File Naming**: Unique filenames with timestamps to prevent conflicts
-- **Static Serving**: Images are served via Express static middleware
-- **Cleanup**: Associated image files are deleted when listings are removed
-
-### Usage
-1. **Creating a Listing**: Use the "Create New Listing" form and upload an image
-2. **Editing a Listing**: Upload a new image to replace the existing one
-3. **Removing Images**: Check the "Remove current image" checkbox in edit form
-4. **Viewing Images**: Images are displayed in listing cards and detail pages
-
-## Setup
-
-1. Install dependencies:
+## Setup & Installation
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repo-url>
+   cd Major-Project-AI-ChatBot
+   ```
+2. **Install dependencies:**
    ```bash
    npm install
    ```
-
-2. Create a `.env` file with your MongoDB connection string:
-   ```
-   ATLASDB_URL=your_mongodb_connection_string
-   SECRET=your_session_secret
-   ```
-
-3. Start the application:
+3. **Environment variables:**
+   - Create a `.env` file in the root with:
+     ```
+     MONGODB_URI=your_mongodb_uri
+     SESSION_SECRET=your_secret
+     HUGGINGFACE_API_KEY=your_hf_key
+     OLLAMA_BASE_URL=http://localhost:11434
+     GOOGLE_MAPS_API_KEY=your_google_maps_key
+     ```
+4. **Start your local Llama2 server (Ollama, llama.cpp, etc.)**
+   - Example for Ollama:
+     ```bash
+     ollama run llama2
+     ```
+5. **Start the app:**
    ```bash
    npm start
+   # Visit http://localhost:3000
    ```
 
-4. Visit `http://localhost:3000` in your browser
+---
 
-## File Structure
+## Usage
+- **Chatbot:** Click the chat icon (bottom right) to ask anything—travel, bookings, or general questions.
+- **Listings:** Browse, filter, and view property details. Use “Near Me” to find local options.
+- **Account:** Sign up to save favorites, manage bookings, and list your own properties.
 
-```
-├── app.js                 # Main application file
-├── models/               # Database models
-├── views/                # EJS templates
-├── public/               # Static files
-│   ├── css/             # Stylesheets
-│   ├── js/              # JavaScript files
-│   └── uploads/         # Uploaded images
-├── routes/               # Route handlers
-└── utils/                # Utility functions
-```
+---
 
-## Dependencies
+## Deployment
+- Deploy to any Node.js-compatible host (Heroku, Render, DigitalOcean, etc.)
+- For production, ensure your Llama2 server is accessible or use the Hugging Face fallback.
+- Use environment variables for all secrets and API keys.
 
-- Express.js - Web framework
-- Mongoose - MongoDB ODM
-- Multer - File upload handling
-- EJS - Template engine
-- Passport.js - Authentication
-- Express-session - Session management
-- Connect-flash - Flash messages 
+---
+
+## Customization
+- **AI Model:**
+  - Change the prompt or model in `app.js` for different behavior.
+  - Add more intents/entities/templates for richer fallback responses.
+- **UI:**
+  - Edit EJS/CSS for branding, themes, or layout changes.
+- **APIs:**
+  - Integrate more travel APIs, payment gateways, or analytics as needed.
+
+---
+
+## License
+This project is for educational and demonstration purposes. For commercial use, review the licenses of all dependencies and AI models.
+
+---
+
+## Credits
+- Llama2 (Meta), Hugging Face, LangChain, Ollama, Bootstrap, MongoDB, and all open-source contributors.
+
+---
+
+**Enjoy your AI-powered travel platform!** 

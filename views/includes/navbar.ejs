@@ -1,54 +1,674 @@
-<nav class="navbar navbar-expand-md bg-body-light border border-bottom sticky-top">
+<!-- Enhanced Modern Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top" role="navigation" aria-label="Main navigation" style="min-height: 5.5rem; height: 5.5rem;">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-compass"></i></a>
+    <!-- Brand Section -->
+    <a class="navbar-brand" href="/listings" aria-label="TravaCasa Home">
+      <span class="brand-ripple-box enhanced-brand-ripple" tabindex="0" aria-label="TravaCasa Home Animated Logo">
+        <span class="brand-ripple"></span>
+        <span class="brand-ripple"></span>
+        <span class="brand-ripple"></span>
+        <span class="brand-ripple-glow"></span>
+        <span class="brand-ripple-text">
+          <span class="brand-gradient-text">TravaCasa</span>
+        </span>
+      </span>
+      <style>
+        .brand-ripple-box {
+          position: relative;
+          display: inline-block;
+          width: 148px;
+          height: 54px;
+          vertical-align: middle;
+          margin-right: 0.7rem;
+          cursor: pointer;
+          outline: none;
+          border-radius: 20px;
+          background: rgba(255,255,255,0.03);
+          box-shadow: 0 2px 16px 0 rgba(102,126,234,0.10), 0 1.5px 8px 0 rgba(255,193,7,0.08);
+          overflow: hidden;
+          transition: 
+            box-shadow 0.38s cubic-bezier(0.4,0,0.2,1),
+            background 0.32s cubic-bezier(0.4,0,0.2,1),
+            transform 0.22s cubic-bezier(0.4,0,0.2,1),
+            filter 0.32s cubic-bezier(0.4,0,0.2,1);
+          will-change: box-shadow, background, transform, filter;
+        }
+        .brand-ripple {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 54px;
+          height: 54px;
+          background: radial-gradient(circle at 60% 40%, #667eea 0%, #ffc107 100%);
+          border-radius: 50%;
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 0.22;
+          animation: ripple-anim 2.2s infinite cubic-bezier(0.4,0,0.2,1);
+          z-index: 1;
+          pointer-events: none;
+          filter: blur(0.5px) saturate(1.2);
+        }
+        .brand-ripple:nth-child(2) {
+          animation-delay: 0.7s;
+          opacity: 0.13;
+          filter: blur(1.2px) saturate(1.1);
+        }
+        .brand-ripple:nth-child(3) {
+          animation-delay: 1.4s;
+          opacity: 0.08;
+          filter: blur(2.2px) saturate(1.05);
+        }
+        .brand-ripple-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 110px;
+          height: 38px;
+          background: radial-gradient(ellipse at 50% 50%, #ffc10755 0%, #667eea22 60%, transparent 100%);
+          border-radius: 50%;
+          transform: translate(-50%, -50%) scale(1.1);
+          opacity: 0.18;
+          z-index: 1;
+          pointer-events: none;
+          filter: blur(6px);
+          transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .brand-ripple-text {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 2;
+          pointer-events: none;
+          user-select: none;
+        }
+        .brand-gradient-text {
+          font-family: 'Poppins', 'Inter', sans-serif;
+          font-weight: 900;
+          font-size: 1.45rem;
+          letter-spacing: 0.7px;
+          background: linear-gradient(90deg, #667eea 0%, #ffc107 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          filter: drop-shadow(0 2px 12px #667eea22) drop-shadow(0 1px 4px #ffc10733);
+          transition: 
+            letter-spacing 0.32s cubic-bezier(0.4,0,0.2,1),
+            filter 0.32s cubic-bezier(0.4,0,0.2,1),
+            text-shadow 0.32s cubic-bezier(0.4,0,0.2,1);
+        }
+        /* Enhanced hover/tap/focus effect */
+        .enhanced-brand-ripple:hover,
+        .enhanced-brand-ripple:focus,
+        .enhanced-brand-ripple.active {
+          box-shadow: 0 6px 32px 0 rgba(102,126,234,0.22), 0 2.5px 16px 0 rgba(255,193,7,0.18);
+          background: linear-gradient(90deg, #f8fafc 0%, #e0e7ff 100%);
+          transform: scale(1.055) rotate(-1.5deg) skewX(-1deg);
+          filter: brightness(1.08) saturate(1.08);
+        }
+        .enhanced-brand-ripple:hover .brand-gradient-text,
+        .enhanced-brand-ripple:focus .brand-gradient-text,
+        .enhanced-brand-ripple.active .brand-gradient-text {
+          letter-spacing: 3.5px;
+          filter: brightness(1.18) drop-shadow(0 2px 16px #ffc10788) drop-shadow(0 1px 8px #667eea55);
+          text-shadow: 0 2px 16px #ffc10744, 0 1px 8px #667eea33;
+        }
+        .enhanced-brand-ripple:hover .brand-ripple-glow,
+        .enhanced-brand-ripple:focus .brand-ripple-glow,
+        .enhanced-brand-ripple.active .brand-ripple-glow {
+          opacity: 0.32;
+        }
+        .enhanced-brand-ripple:active {
+          transform: scale(0.97) rotate(1.5deg) skewX(1deg);
+          box-shadow: 0 1px 8px 0 rgba(102,126,234,0.13);
+          filter: brightness(0.98) saturate(1.02);
+        }
+        /* Ripple burst on tap/hover */
+        .brand-ripple-box.ripple-burst .brand-ripple {
+          animation: ripple-burst 0.6s cubic-bezier(0.4,0,0.2,1);
+        }
+        .brand-ripple-box.ripple-burst .brand-ripple-glow {
+          opacity: 0.5 !important;
+          transition: opacity 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        @keyframes ripple-anim {
+          0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.22;
+          }
+          70% {
+            transform: translate(-50%, -50%) scale(1.7);
+            opacity: 0.04;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(2.3);
+            opacity: 0;
+          }
+        }
+        @keyframes ripple-burst {
+          0% {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.35;
+          }
+          60% {
+            transform: translate(-50%, -50%) scale(2.5);
+            opacity: 0.10;
+          }
+          100% {
+            transform: translate(-50%, -50%) scale(3.1);
+            opacity: 0;
+          }
+        }
+        /* Accessibility: focus ring */
+        .brand-ripple-box:focus-visible {
+          box-shadow: 0 0 0 3px #667eea88, 0 6px 32px 0 rgba(102,126,234,0.22);
+        }
+      </style>
+      <script>
+        // Brand ripple burst on tap/click/keyboard, with enhanced transitions
+        document.addEventListener('DOMContentLoaded', function() {
+          const brandBox = document.querySelector('.brand-ripple-box');
+          if (!brandBox) return;
+          let burstTimeout;
+          function triggerRippleBurst() {
+            brandBox.classList.remove('ripple-burst');
+            void brandBox.offsetWidth; // force reflow
+            brandBox.classList.add('ripple-burst');
+            clearTimeout(burstTimeout);
+            burstTimeout = setTimeout(() => brandBox.classList.remove('ripple-burst'), 650);
+          }
+          function setActiveState(on) {
+            if (on) brandBox.classList.add('active');
+            else brandBox.classList.remove('active');
+          }
+          brandBox.addEventListener('mousedown', function(e) {
+            setActiveState(true);
+            triggerRippleBurst();
+          });
+          brandBox.addEventListener('mouseup', function(e) {
+            setActiveState(false);
+          });
+          brandBox.addEventListener('mouseleave', function(e) {
+            setActiveState(false);
+          });
+          brandBox.addEventListener('touchstart', function(e) {
+            setActiveState(true);
+            triggerRippleBurst();
+          }, {passive:true});
+          brandBox.addEventListener('touchend', function(e) {
+            setActiveState(false);
+          });
+          brandBox.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              setActiveState(true);
+              triggerRippleBurst();
+            }
+          });
+          brandBox.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              setActiveState(false);
+            }
+          });
+        });
+      </script>
+      <!-- <span class="brand-text">TravaCasa</span> -->
+      <!-- <span class="brand-tagline">Your Perfect Stay</span> -->
+    </a>
+    
+    <!-- Mobile Menu Toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+    
+    <!-- Navigation Menu -->
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
-        <a class="nav-link" href="/listings/new">Airbnb your home</a>
-        <div class="navbar-nav ms-auto">
-       
-       
-        <% if (!currentUser) { %>
-          <a class="nav-link" href="/login"><b>Login</b></a>
-          <a class="nav-link" href="/signup"><b>Sign Up</b></a>
-        <% } else { %>
-          <a class="nav-link" href="/logout"><b>Logout</b></a>
-        <% } %>
+      <div class="navbar-nav me-auto">
+        <a class="nav-link" href="/listings" aria-label="Explore Listings">
+          <i class="fas fa-search me-2"></i>
+          <span>Explore</span>
+        </a>
+        <a class="nav-link" href="/listings/new" aria-label="Host your space">
+          <i class="fas fa-plus-circle me-2"></i>
+          <span>Host your space</span>
+        </a>
       </div>
+      
+      <!-- User Section -->
+      <div class="navbar-nav ms-auto">
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle me-2" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">
+          <i class="fas fa-moon" id="darkModeIcon"></i>
+        </button>
+        
+        <% if (!currentUser) { %>
+          <a class="nav-link login-btn" href="/login" aria-label="Login">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            <span>Login</span>
+          </a>
+          <a class="nav-link signup-btn" href="/signup" aria-label="Sign Up">
+            <i class="fas fa-user-plus me-2"></i>
+            <span>Sign Up</span>
+          </a>
+        <% } else { %>
+          <div class="user-profile-section ms-2">
+            <div class="user-avatar-dropdown">
+              <button class="user-avatar-btn enhanced-profile-btn" type="button" id="userInfoToggleBtn" aria-label="User menu for <%= currentUser.username %>">
+                <div class="user-avatar">
+                  <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="user-name fw-bold position-relative" style="padding-right: 1.2em;">
+                  <%= currentUser.username %>
+                  <span class="status-dot position-absolute top-50 translate-middle-y" style="right:0.2em; width:0.7em; height:0.7em; background:#22c55e; border-radius:50%; display:inline-block; border:2px solid #fff;"></span>
+                </span>
+                <i class="fas fa-chevron-down dropdown-icon"></i>
+              </button>
+            </div>
+          </div>
+          <!-- User Info Side Panel & Backdrop -->
+          <div id="userInfoBackdrop" class="user-info-backdrop" style="display:none;"></div>
+          <aside id="userInfoPanel" class="user-info-panel" style="display:none;">
+            <button class="close-user-info" id="closeUserInfoPanel" aria-label="Close user info">&times;</button>
+            <div class="user-info-content">
+              <div class="user-info-header">
+                <i class="fas fa-user-circle user-avatar-large"></i>
+                <div class="user-info-details">
+                  <div class="user-info-username fw-bold"><%= currentUser.username %></div>
+                  <div class="user-info-email text-muted"><%= currentUser.email %></div>
+                  <div class="user-info-member">Member since <%= new Date(currentUser.createdAt || new Date()).toLocaleDateString() %></div>
+                </div>
+              </div>
+              <hr>
+              <ul class="user-info-links">
+                <li><a href="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                <li><a href="/my-listings"><i class="fas fa-home me-2"></i>My Listings</a></li>
+                <li><a href="/favorites"><i class="fas fa-heart me-2"></i>Favorites</a></li>
+                <li><a href="/bookings"><i class="fas fa-calendar me-2"></i>My Bookings</a></li>
+                <li><a href="/settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                <li><hr></li>
+                <li><a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              </ul>
+            </div>
+          </aside>
+        <% } %>
       </div>
     </div>
   </div>
 </nav>
 
-<div class="w-100 d-flex justify-content-center mt-2 mb-2">
-  <form class="d-flex search-container" role="search" method="GET" action="/listings">
-    <div class="position-relative flex-grow-1">
-      <input class="form-control me-2 custom-search-input" type="search" name="search" placeholder="Search Destination" aria-label="Search" value="<%= locals.searchQuery || '' %>" />
-      <% if (locals.searchQuery) { %>
-        <a href="/listings" class="position-absolute top-50 end-0 translate-middle-y me-3 text-decoration-none" style="z-index: 10;">
-          <i class="fa fa-times text-muted"></i>
-        </a>
-      <% } %>
+<!-- Enhanced Search Hero Section -->
+<div class="search-hero-section d-flex align-items-center justify-content-center" style="min-height: 40vh;">
+  <div class="container">
+    <div class="search-hero-content text-center">
+      <h1 class="search-hero-title">Find Your Perfect Stay</h1>
+      <p class="search-hero-subtitle">Discover amazing places to stay around the world</p>
+      
+      <!-- Enhanced Search Form -->
+      <form class="enhanced-search-form" role="search" method="GET" action="/listings">
+        <div class="search-input-group">
+          <div class="search-input-wrapper">
+            <i class="fas fa-map-marker-alt search-icon"></i>
+            <input 
+              class="search-input" 
+              type="search" 
+              name="search" 
+              placeholder="Where are you going?" 
+              aria-label="Search" 
+              value="<%= locals.searchQuery || '' %>" 
+              autocomplete="off"
+              id="mainSearchInput"
+            />
+            <% if (locals.searchQuery) { %>
+              <a href="/listings" class="clear-search-btn" title="Clear search">
+                <i class="fas fa-times"></i>
+              </a>
+            <% } %>
+            <!-- Voice Search Button (Classic Mic, triggers modal) -->
+            <button type="button" class="searchbar-mic-btn" id="voiceSearchBtn" title="Voice Search" aria-label="Voice Search">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            
+            <!-- Voice Search Status Modal -->
+            <div id="voiceSearchModal" class="voice-search-modal" style="display: none;">
+              <div class="voice-modal-content">
+                <div class="voice-modal-header">
+                  <h4 id="voiceModalTitle">Voice Search</h4>
+                  <button class="voice-modal-close" id="voiceModalClose" aria-label="Close voice search">&times;</button>
+                </div>
+                <div class="voice-modal-body">
+                  <div class="voice-animation" id="voiceAnimation">
+                    <span id="modalMicIcon" class="voice-modal-mic" style="display:none;">
+                      <svg class="mic-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                          <linearGradient id="modalMicGradient" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#667eea"/>
+                            <stop offset="1" stop-color="#f093fb"/>
+                          </linearGradient>
+                        </defs>
+                        <ellipse cx="18" cy="18" rx="16" ry="16" fill="url(#modalMicGradient)" opacity="0.18"/>
+                        <rect x="15" y="8" width="6" height="16" rx="3" fill="url(#modalMicGradient)"/>
+                        <rect x="17" y="24" width="2" height="6" rx="1" fill="#667eea"/>
+                        <path d="M11 18c0 4 3 7 7 7s7-3 7-7" stroke="#764ba2" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                    </span>
+                  </div>
+                  <p class="fa-solid fa-microphone" id="voiceModalMessage">Click the microphone to start voice search</p>
+                  <div class="voice-controls">
+                    <button class="voice-control-btn" id="voiceStartBtn" style="display: none;">
+                      <i class="fas fa-microphone"></i>
+                      Start Recording
+                    </button>
+                    <button class="voice-control-btn cancel" id="voiceStopBtn" style="display: none;">
+                      <i class="fas fa-stop"></i>
+                      Stop Recording
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <button class="search-submit-btn" type="submit" id="enhancedSearchBtn">
+            <i class="fas fa-search"></i>
+            <span>Search</span>
+          </button>
+        </div>
+        
+        <!-- Quick Search Suggestions -->
+        <div class="quick-search-suggestions">
+          <span class="suggestions-label">Popular destinations:</span>
+          <div class="suggestions-pills">
+            <a href="/listings?search=mountain" class="suggestion-pill">
+              <i class="fas fa-mountain"></i>
+              Mountain
+            </a>
+            <a href="/listings?search=beach" class="suggestion-pill">
+              <i class="fas fa-umbrella-beach"></i>
+              Beach
+            </a>
+            <a href="/listings?search=city" class="suggestion-pill">
+              <i class="fas fa-city"></i>
+              City
+            </a>
+            <a href="/listings?search=forest" class="suggestion-pill">
+              <i class="fas fa-tree"></i>
+              Forest
+            </a>
+          </div>
+        </div>
+      </form>
+      
+      <!-- Search Stats -->
+      <div class="search-stats">
+        <div class="stat-item">
+          <i class="fas fa-home"></i>
+          <span>10,000+ Properties</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-globe"></i>
+          <span>50+ Countries</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-star"></i>
+          <span>4.8 Rating</span>
+        </div>
+      </div>
     </div>
-    <button class="btn custom-search-btn" type="submit" id="searchBtn">
-      <i class="fa fa-search me-2"></i> <span>Search</span>
-    </button>
-  </form>
+  </div>
 </div>
 
 <script>
-  // Add active class on mousedown, remove on mouseup/mouseleave for click effect
-  const searchBtn = document.getElementById('searchBtn');
-  searchBtn.addEventListener('mousedown', function() {
-    searchBtn.classList.add('active');
+  // Enhanced Search Button Interactions
+  const searchBtn = document.getElementById('enhancedSearchBtn');
+  if (searchBtn) {
+    searchBtn.addEventListener('mousedown', function() {
+      searchBtn.classList.add('active');
+    });
+    searchBtn.addEventListener('mouseup', function() {
+      searchBtn.classList.remove('active');
+    });
+    searchBtn.addEventListener('mouseleave', function() {
+      searchBtn.classList.remove('active');
+    });
+  }
+  
+  // Enhanced Voice Search Implementation
+  document.addEventListener('DOMContentLoaded', function() {
+    const voiceBtn = document.getElementById('voiceSearchBtn');
+    const micIcon = document.getElementById('micIcon');
+    const modalMicIcon = document.getElementById('modalMicIcon');
+    const voiceModal = document.getElementById('voiceSearchModal');
+    const voiceModalClose = document.getElementById('voiceModalClose');
+    const voiceModalTitle = document.getElementById('voiceModalTitle');
+    const voiceModalMessage = document.getElementById('voiceModalMessage');
+    const voiceAnimation = document.getElementById('voiceAnimation');
+    const searchInput = document.getElementById('mainSearchInput');
+    
+    if (!voiceBtn || !voiceModal || !searchInput) return;
+    
+    // Check for Speech Recognition support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      voiceBtn.style.display = 'none';
+      console.log('Speech Recognition not supported');
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    
+    let isListening = false;
+    
+    // Voice button click handler
+    voiceBtn.addEventListener('click', function() {
+      if (!isListening) {
+        startVoiceSearch();
+      } else {
+        stopVoiceSearch();
+      }
+    });
+    
+    // Modal close handlers
+    voiceModalClose.addEventListener('click', function() {
+      closeVoiceModal();
+      if (isListening) stopVoiceSearch();
+    });
+    
+    voiceModal.addEventListener('click', function(e) {
+      if (e.target === voiceModal) {
+        closeVoiceModal();
+        if (isListening) stopVoiceSearch();
+      }
+    });
+    
+    // Start voice search
+    function startVoiceSearch() {
+      try {
+        showVoiceModal();
+        voiceModalTitle.textContent = 'Listening...';
+        voiceModalMessage.textContent = 'Speak now! Say something like "beach house" or "mountain cabin"';
+        
+        voiceBtn.classList.add('listening');
+        if (micIcon) micIcon.classList.add('fa-beat');
+        if (modalMicIcon) modalMicIcon.style.display = 'inline-block';
+        voiceAnimation.style.display = 'flex';
+        
+        isListening = true;
+        recognition.start();
+        
+        // Auto-stop after 10 seconds
+        setTimeout(() => {
+          if (isListening) {
+            recognition.stop();
+          }
+        }, 10000);
+        
+      } catch (error) {
+        console.error('Voice search error:', error);
+        showErrorMessage('Voice search is not available. Please try again.');
+      }
+    }
+    
+    // Stop voice search
+    function stopVoiceSearch() {
+      if (isListening) {
+        recognition.stop();
+        isListening = false;
+        voiceBtn.classList.remove('listening');
+        if (micIcon) micIcon.classList.remove('fa-beat');
+        if (modalMicIcon) modalMicIcon.style.display = 'none';
+        voiceAnimation.style.display = 'none';
+      }
+    }
+    
+    // Recognition event handlers
+    recognition.onstart = function() {
+      console.log('Voice recognition started');
+      voiceBtn.classList.add('listening');
+      if (micIcon) micIcon.classList.add('fa-beat');
+      if (modalMicIcon) modalMicIcon.style.display = 'inline-block';
+      voiceAnimation.style.display = 'flex';
+    };
+    
+    recognition.onresult = function(event) {
+      const transcript = event.results[0][0].transcript;
+      const confidence = event.results[0][0].confidence;
+      
+      console.log('Voice recognition result:', transcript, 'Confidence:', confidence);
+      
+      // Update search input
+      searchInput.value = transcript;
+      
+      // Show success message
+      voiceModalTitle.textContent = 'Voice Search Complete!';
+      voiceModalMessage.innerHTML = `
+        <div class="voice-result">
+          <i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i>
+          <strong>Found:</strong> "${transcript}"
+          <br>
+          <small>Confidence: ${Math.round(confidence * 100)}%</small>
+        </div>
+      `;
+      
+      voiceBtn.classList.remove('listening');
+      voiceBtn.classList.add('success');
+      if (micIcon) micIcon.classList.remove('fa-beat');
+      if (modalMicIcon) modalMicIcon.style.display = 'none';
+      voiceAnimation.style.display = 'none';
+      
+      // Auto-submit search after 2 seconds
+      setTimeout(() => {
+        const searchForm = searchInput.closest('form');
+        if (searchForm) {
+          closeVoiceModal();
+          searchForm.submit();
+        }
+      }, 2000);
+      
+      // Reset button state
+      setTimeout(() => {
+        voiceBtn.classList.remove('success');
+      }, 3000);
+    };
+    
+    recognition.onerror = function(event) {
+      console.error('Voice recognition error:', event.error);
+      
+      let errorMessage = 'Voice search encountered an error. Please try again.';
+      
+      switch(event.error) {
+        case 'network':
+          errorMessage = 'Network error. Please check your internet connection.';
+          break;
+        case 'not-allowed':
+          errorMessage = 'Microphone access denied. Please allow microphone access and try again.';
+          break;
+        case 'no-speech':
+          errorMessage = 'No speech detected. Please speak clearly and try again.';
+          break;
+        case 'aborted':
+          errorMessage = 'Voice search was cancelled.';
+          break;
+      }
+      
+      showErrorMessage(errorMessage);
+    };
+    
+    recognition.onend = function() {
+      console.log('Voice recognition ended');
+      isListening = false;
+      voiceBtn.classList.remove('listening');
+      if (micIcon) micIcon.classList.remove('fa-beat');
+      if (modalMicIcon) modalMicIcon.style.display = 'none';
+      voiceAnimation.style.display = 'none';
+    };
+    
+    // Helper functions
+    function showVoiceModal() {
+      voiceModal.style.display = 'flex';
+      setTimeout(() => {
+        voiceModal.classList.add('show');
+      }, 10);
+    }
+    
+    function closeVoiceModal() {
+      voiceModal.classList.remove('show');
+      setTimeout(() => {
+        voiceModal.style.display = 'none';
+      }, 300);
+    }
+    
+    function showErrorMessage(message) {
+      voiceModalTitle.textContent = 'Voice Search Error';
+      voiceModalMessage.innerHTML = `
+        <div class="voice-error">
+          <i class="fas fa-exclamation-triangle" style="color: #ef4444; margin-right: 0.5rem;"></i>
+          ${message}
+        </div>
+      `;
+      
+      voiceBtn.classList.remove('listening');
+      voiceBtn.classList.add('error');
+      if (micIcon) micIcon.classList.remove('fa-beat');
+      if (modalMicIcon) modalMicIcon.style.display = 'none';
+      voiceAnimation.style.display = 'none';
+      
+      setTimeout(() => {
+        voiceBtn.classList.remove('error');
+      }, 3000);
+    }
   });
-  searchBtn.addEventListener('mouseup', function() {
-    searchBtn.classList.remove('active');
-  });
-  searchBtn.addEventListener('mouseleave', function() {
-    searchBtn.classList.remove('active');
+
+  // User Info Side Panel Logic
+  document.addEventListener('DOMContentLoaded', function() {
+    const userInfoToggleBtn = document.getElementById('userInfoToggleBtn');
+    const userInfoPanel = document.getElementById('userInfoPanel');
+    const userInfoBackdrop = document.getElementById('userInfoBackdrop');
+    const closeUserInfoPanel = document.getElementById('closeUserInfoPanel');
+    if (userInfoToggleBtn && userInfoPanel && userInfoBackdrop && closeUserInfoPanel) {
+      userInfoToggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        userInfoPanel.style.display = 'block';
+        userInfoBackdrop.style.display = 'block';
+        setTimeout(() => {
+          userInfoPanel.classList.add('open');
+          userInfoBackdrop.classList.add('show');
+        }, 10);
+      });
+      function closePanel() {
+        userInfoPanel.classList.remove('open');
+        userInfoBackdrop.classList.remove('show');
+        setTimeout(() => {
+          userInfoPanel.style.display = 'none';
+          userInfoBackdrop.style.display = 'none';
+        }, 300);
+      }
+      closeUserInfoPanel.addEventListener('click', closePanel);
+      userInfoBackdrop.addEventListener('click', closePanel);
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && userInfoPanel.classList.contains('open')) closePanel();
+      });
+    }
   });
 </script>

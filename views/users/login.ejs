@@ -1,25 +1,178 @@
 <% layout('layouts/boilerplate') %>
+<style>
+    .login-brand-section {
+        margin-bottom: 2rem;
+    }
+    
+    .brand-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .login-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e8ecf4;
+    }
+    
+    .login-header h4 {
+        color: #2c3e50;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .text-muted a {
+        color: #667eea;
+        font-weight: 500;
+    }
+    
+    .text-muted a:hover {
+        color: #5a6fd8;
+    }
+    
+    .needs-validation .form-control:invalid {
+        border-color: #dc3545;
+    }
+    
+    .needs-validation .form-control:valid {
+        border-color: #28a745;
+    }
+    
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .valid-feedback {
+        display: block;
+        color: #28a745;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+</style>
 <div class="container">
     <div class="col-12 text-center mb-4">
-        <h1 class="display-5 fw-bold" style="letter-spacing:2px; color:#2c3e50;">Login to Wanderlust</h1>
+        <div class="login-brand-section">
+            <i class="fa-solid fa-compass brand-icon"></i>
+            <h1 class="display-5 fw-bold" style="letter-spacing:2px; color:#2c3e50;">Welcome back to TravaCasa</h1>
+            <p class="lead text-muted">Sign in to continue your perfect stay journey</p>
+        </div>
     </div>
-    <div class="col-6 offset-3">
-        <form action="/login" method="POST" class="needs-validation" novalidate>
+    <div class="col-10 col-md-6 offset-1 offset-md-3">
+        <div class="login-container">
+            <div class="login-header">
+                <h4 class="mb-3">Sign in to your account</h4>
+            </div>
+        <form action="/login" method="POST" class="needs-validation" novalidate aria-label="Login form">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
+                <input type="text" class="form-control" id="username" name="username" required aria-label="Username">
                 <div class="valid-feedback">
                     Looks good!
                 </div>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+                <input type="password" class="form-control" id="password" name="password" required aria-label="Password">
                 <div class="valid-feedback">
                     Password looks good!
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Login</button>
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary" id="loginBtn" aria-label="Login">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Login
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <p class="text-muted mb-0">Don't have an account? <a href="/signup" class="text-decoration-none">Sign up here</a></p>
+            </div>
         </form>
+        </div>
     </div>
 </div>
+
+<script>
+    // Enhanced form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('.needs-validation');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        // Form validation
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            } else {
+                // Show loading state
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing in...';
+                loginBtn.disabled = true;
+            }
+            form.classList.add('was-validated');
+        });
+        
+        // Real-time validation feedback
+        const inputs = form.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+        
+        // Enter key handling
+        inputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    form.requestSubmit();
+                }
+            });
+        });
+    });
+</script>

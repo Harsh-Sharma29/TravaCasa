@@ -8,183 +8,319 @@
     <button>Create New Listing</button>
     </form> -->
 
-    <style>
-        #filters{
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 10px;
-        }
-        .filter{
-            text-align: center;
-            margin-right: 2rem;
-            margin-top: 1rem;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        .filter i{  
-            font-size: 1.2rem;
-        }
-        .filter p{
-            font-size: 0.8rem;
-        }
-        .filter:hover{
-            opacity: 1;
-        }
-        .filter:hover i{
-            color: #000;
-        }
-        .tax-info{
-            display:none;
-
-        }
-        .tax-toggle{
-            border:1px solid black ;
-            border-radius:1rem;
-            height :3.25rem;
-            padding :1rem;
-            margin-left: 3rem;
-            display:flex;
-            align-items: center;
-        }
-    </style>
-    <div id="filters">
-        <div class="filter">
-            <i class="fa-solid fa-fire"></i>
-            <p>Trending</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-star"></i>
-            <p>Top Rated</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-location-dot"></i>
-            <p>Location</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-bed"></i>
-            <p>Bedrooms</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-mountain"></i>
-            <p>Mountains</p>
-        </div>
-        
-        <div class="filter">
-            <i class="fa-solid fa-water-ladder"></i>
-            <p>Amazing Pools</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-calendar-days"></i>
-            <p>Date</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-igloo"></i>
-            <p>Domes</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-snowflake"></i>
-            <p>Arctic </p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-campground"></i>
-            <p>Camping</p>
-        </div>
-        <div class="filter">
-            <i class="fa-solid fa-leaf"></i>
-            <p>Eco Friendly</p>
-        </div>
-        <div class="tax-toggle">
+    <div class="main-content">
+        <!-- Sidebar Filters -->
+        <aside class="filters-sidebar" role="complementary" aria-label="Filter sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fa-solid fa-filter me-2"></i>Filters</h3>
+                <div class="sidebar-controls">
+                    <button class="sidebar-toggle d-lg-none" id="sidebarToggle" aria-label="Close sidebar">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                    <button class="desktop-sidebar-toggle d-none d-lg-block" id="desktopSidebarToggle" title="Toggle Filters Sidebar" aria-label="Toggle Filters Sidebar">
+                        <i class="fa-solid fa-angles-left" id="sidebarIcon"></i>
+                        <span id="toggleText">Hide Filters</span>
+                    </button>
+                </div>
+            </div>
             
-        <div class="form-check-reverse form-switch">
-            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
-            <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
-          </div>
-        </div>
-
-
-    </div>
-    <div class ="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-          <% if (allListings.length === 0) { %>
-            <div class="col-12 text-center mt-5">
-                <% if (searchQuery) { %>
-                    <div class="no-results">
-                        <i class="fa-solid fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
-                        <h3>No listings found</h3>
-                        <p class="text-muted">We couldn't find any listings matching "<%= searchQuery %>"</p>
-                        <div class="trending-searches mt-4">
-                            <h6 class="text-muted mb-3">Try these popular destinations:</h6>
-                            <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                <a href="/listings?search=mountain" class="btn btn-outline-primary btn-sm">Mountain</a>
-                                <a href="/listings?search=beach" class="btn btn-outline-primary btn-sm">Beach</a>
-                                <a href="/listings?search=city" class="btn btn-outline-primary btn-sm">City</a>
-                                <a href="/listings?search=forest" class="btn btn-outline-primary btn-sm">Forest</a>
-                                <a href="/listings?search=lake" class="btn btn-outline-primary btn-sm">Lake</a>
-                            </div>
+            <div class="filters-container">
+                <button class="btn btn-outline-secondary w-100 mb-3" id="clearFiltersBtn" type="button">
+                    <i class="fa fa-times me-2"></i>Clear Filters
+                </button>
+                <div class="filter-group">
+                    <h4 class="filter-group-title">Categories</h4>
+                    <div class="filter" data-filter="all">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-all" data-filter="all" checked>
+                        <label for="filter-all"><i class="fa-solid fa-list"></i> All Properties</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="trending">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-trending" data-filter="trending">
+                        <label for="filter-trending"><i class="fa-solid fa-fire"></i> Trending</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="toprated">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-toprated" data-filter="toprated">
+                        <label for="filter-toprated"><i class="fa-solid fa-star"></i> Top Rated</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <h4 class="filter-group-title">Location Type</h4>
+                    <div class="filter" data-filter="mountain">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-mountain" data-filter="mountain">
+                        <label for="filter-mountain"><i class="fa-solid fa-mountain"></i> Mountains</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="beach">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-beach" data-filter="beach">
+                        <label for="filter-beach"><i class="fa-solid fa-umbrella-beach"></i> Beach</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="city">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-city" data-filter="city">
+                        <label for="filter-city"><i class="fa-solid fa-city"></i> City</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <h4 class="filter-group-title">Property Type</h4>
+                    <div class="filter" data-filter="villa">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-villa" data-filter="villa">
+                        <label for="filter-villa"><i class="fa-solid fa-house-chimney"></i> Villas</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="apartment">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-apartment" data-filter="apartment">
+                        <label for="filter-apartment"><i class="fa-solid fa-building"></i> Apartments</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <h4 class="filter-group-title">Price Range</h4>
+                    <div class="filter" data-filter="budget">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-budget" data-filter="budget">
+                        <label for="filter-budget"><i class="fa-solid fa-coins"></i> Budget Friendly</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                    <div class="filter" data-filter="luxury">
+                        <input type="checkbox" class="form-check-input filter-checkbox" id="filter-luxury" data-filter="luxury">
+                        <label for="filter-luxury"><i class="fa-solid fa-crown"></i> Luxury</label>
+                        <div class="filter-indicator"></div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <div class="tax-toggle">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                            <label class="form-check-label" for="switchCheckDefault">
+                                <i class="fa-solid fa-calculator me-2"></i>Include taxes
+                            </label>
                         </div>
-                        <a href="/listings" class="btn btn-dark mt-3">View All Listings</a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Toggle Button for Mobile -->
+        <button class="mobile-filter-toggle d-lg-none" id="mobileFilterToggle">
+            <i class="fa-solid fa-filter me-2"></i>Filters
+        </button>
+        
+        <!-- Main Content Area -->
+        <main class="content-area" role="main" aria-label="Listings content">
+            
+            <!-- Enhanced Results Section -->
+            <div class="listings-results-section">
+                <% if (allListings.length === 0) { %>
+                    <div class="empty-state">
+                        <% if (searchQuery) { %>
+                            <div class="no-results-container">
+                                <div class="no-results-icon">
+                                    <i class="fas fa-search-location"></i>
+                                </div>
+                                <h3 class="no-results-title">No listings found</h3>
+                                <p class="no-results-subtitle">We couldn't find any listings matching "<%= searchQuery %>"</p>
+                                
+                                <div class="suggested-searches">
+                                    <h6>Try these popular destinations:</h6>
+                                    <div class="suggestion-tags">
+                                        <a href="/listings?search=mountain" class="suggestion-tag mountain">
+                                            <i class="fas fa-mountain"></i>
+                                            Mountain
+                                        </a>
+                                        <a href="/listings?search=beach" class="suggestion-tag beach">
+                                            <i class="fas fa-umbrella-beach"></i>
+                                            Beach
+                                        </a>
+                                        <a href="/listings?search=city" class="suggestion-tag city">
+                                            <i class="fas fa-city"></i>
+                                            City
+                                        </a>
+                                        <a href="/listings?search=forest" class="suggestion-tag forest">
+                                            <i class="fas fa-tree"></i>
+                                            Forest
+                                        </a>
+                                        <a href="/listings?search=lake" class="suggestion-tag lake">
+                                            <i class="fas fa-water"></i>
+                                            Lake
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <a href="/listings" class="btn btn-primary view-all-btn">
+                                    <i class="fas fa-list me-2"></i>
+                                    View All Listings
+                                </a>
+                            </div>
+                        <% } else { %>
+                            <div class="no-listings-container">
+                                <div class="no-listings-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <h3 class="no-listings-title">No listings available</h3>
+                                <p class="no-listings-subtitle">Be the first to create a listing!</p>
+                                <a href="/listings/new" class="btn btn-primary create-first-btn">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Create First Listing
+                                </a>
+                            </div>
+                        <% } %>
                     </div>
                 <% } else { %>
-                    <div class="no-listings">
-                        <i class="fa-solid fa-home" style="font-size: 3rem; color: #ccc; margin-bottom: 1rem;"></i>
-                        <h3>No listings available</h3>
-                        <p class="text-muted">Be the first to create a listing!</p>
-                        <a href="/listings/new" class="btn btn-dark">Create Listing</a>
+                    <!-- Search Results Header -->
+                    <% if (searchQuery) { %>
+                        <div class="search-results-banner">
+                            <div class="search-results-info">
+                                <h4 class="results-title">
+                                    <i class="fas fa-search me-2"></i>
+                                    Search Results for "<%= searchQuery %>"
+                                </h4>
+                                <p class="results-count">
+                                    <i class="fas fa-home me-1"></i>
+                                    <%= allListings.length %> listing<%= allListings.length !== 1 ? 's' : '' %> found
+                                </p>
+                            </div>
+                            
+                            <div class="search-actions">
+                                <a href="/listings" class="btn btn-outline-primary clear-search-btn">
+                                    <i class="fas fa-times me-2"></i>
+                                    Clear Search
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <% if (searchHistory && searchHistory.length > 0) { %>
+                            <div class="related-searches">
+                                <span class="related-label">Related searches:</span>
+                                <div class="related-pills">
+                                    <% searchHistory.forEach(function(suggestion) { %>
+                                        <a href="/listings?search=<%= encodeURIComponent(suggestion) %>" 
+                                           class="related-pill">
+                                            <%= suggestion %>
+                                        </a>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <!-- All Listings Header -->
+                        
+                    <% } %>
+                    
+                    <!-- Listings Grid -->
+                    <div class="row g-4">
+                        <% for(let listing of allListings) { %>
+                            <div class="col-lg-4 col-md-6 col-sm-12 mb-4 h-100">
+                                <article class="listing-card-wrapper h-100">
+                                    <a href="/listings/<%= listing._id %>" class="listing-card-link">
+                                        <div class="enhanced-card h-100">
+                                            <!-- Image Section -->
+                                            <div class="card-image-container">
+                                                <img 
+                                                    src="<%= listing.image.url %>" 
+                                                    class="card-image" 
+                                                    alt="<%= listing.title %>" 
+                                                    loading="lazy"
+                                                    onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\' viewBox=\'0 0 400 300\'><defs><linearGradient id=\'grad\' x1=\'0%\' y1=\'0%\' x2=\'100%\' y2=\'100%\'><stop offset=\'0%\' stop-color=\'%23f8fafc\'/><stop offset=\'100%\' stop-color=\'%23e2e8f0\'/></linearGradient></defs><rect width=\'400\' height=\'300\' fill=\'url(%23grad)\'/><circle cx=\'200\' cy=\'150\' r=\'40\' fill=\'%23cbd5e1\'/><text x=\'200\' y=\'200\' text-anchor=\'middle\' fill=\'%236b7280\' font-family=\'Inter, sans-serif\' font-size=\'14\' font-weight=\'500\'>No Image Available</text></svg>';">
+                                                
+                                                <!-- Favorite Button -->
+                                                <button class="favorite-btn" onclick="event.preventDefault(); toggleFavorite('<%= listing._id %>')" aria-label="Add to favorites" aria-pressed="false">
+                                                    <i class="far fa-heart"></i>
+                                                </button>
+                                                
+                                                <!-- Property Type Badge -->
+                                                <div class="property-type-badge">
+                                                    <i class="fas fa-home"></i>
+                                                    <span>Property</span>
+                                                </div>
+                                                
+                                                <!-- Image Overlay -->
+                                                <div class="image-overlay">
+                                                    <div class="overlay-content">
+                                                        <i class="fas fa-eye"></i>
+                                                        <span>View Details</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Card Content -->
+                                            <div class="card-content">
+                                                <!-- Title and Rating -->
+                                                <div class="card-header-section">
+                                                    <h3 class="listing-title"><%=listing.title%></h3>
+                                                    <div class="rating-section">
+                                                        <div class="rating-stars">
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star"></i>
+                                                            <i class="fas fa-star-half-alt"></i>
+                                                        </div>
+                                                        <span class="rating-text">4.8</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Description -->
+                                                <p class="listing-description">
+                                                    <%= listing.description.length > 120 ? listing.description.substring(0, 120) + '...' : listing.description %>
+                                                </p>
+                                                
+                                                <!-- Location -->
+                                                <div class="location-section">
+                                                    <i class="fas fa-map-marker-alt location-icon"></i>
+                                                    <span class="location-text"><%= listing.location %>, <%= listing.country %></span>
+                                                </div>
+                                                
+                                                <!-- Price and Amenities -->
+                                                <div class="price-amenities-section">
+                                                    <div class="price-section">
+                                                        <span class="price-amount">₹<%= listing.price.toLocaleString("en-IN") %></span>
+                                                        <span class="price-period">/night</span>
+                                                        <span class="tax-info">+10% GST</span>
+                                                    </div>
+                                                    
+                                                    <div class="amenities-preview">
+                                                        <div class="amenity-item">
+                                                            <i class="fas fa-wifi"></i>
+                                                        </div>
+                                                        <div class="amenity-item">
+                                                            <i class="fas fa-car"></i>
+                                                        </div>
+                                                        <div class="amenity-item">
+                                                            <i class="fas fa-swimming-pool"></i>
+                                                        </div>
+                                                        <span class="amenities-more">+5 more</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Footer Section -->
+                                                <div class="card-footer-section">
+                                                    <div class="availability-status">
+                                                        <div class="status-indicator available"></div>
+                                                        <span>Available</span>
+                                                    </div>
+                                                    
+                                                    <div class="review-count">
+                                                        <i class="fas fa-comment"></i>
+                                                        <span>24 reviews</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </article>
+                            </div>
+                        <% } %>
                     </div>
                 <% } %>
             </div>
-          <% } else { %>
-            <% if (searchQuery) { %>
-                <div class="col-12 mb-3">
-                    <div class="search-results-header">
-                        <h4>Search Results for "<%= searchQuery %>"</h4>
-                        <p><%= allListings.length %> listing(s) found</p>
-                    </div>
-                    
-                    <% if (searchHistory && searchHistory.length > 0) { %>
-                        <div class="search-suggestions mt-3">
-                            <h6 class="text-muted mb-2">Related searches:</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <% searchHistory.forEach(function(suggestion) { %>
-                                    <a href="/listings?search=<%= encodeURIComponent(suggestion) %>" 
-                                       class="btn btn-outline-secondary btn-sm">
-                                        <%= suggestion %>
-                                    </a>
-                                <% }); %>
-                            </div>
-                        </div>
-                    <% } %>
-                </div>
-            <% } %>
-            <% for(let listing of allListings) { %>
-            <a href="/listings/<%= listing._id %>" class="text-decoration-none text-dark">
-    <div class="card col">
-    <img 
-        src="<%= listing.image.url %>" 
-        class="card-img-top" 
-        alt="listing_image" 
-        style="height: 200px; object-fit: cover;"
-        onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'><rect width=\'200\' height=\'200\' fill=\'%23f8f9fa\'/><text x=\'100\' y=\'100\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%236c757d\' font-family=\'Arial, sans-serif\' font-size=\'14\'>No Image</text></svg>';">
-        <div class="card-img-overlay "></div>
-    <div class="card-body">
-        <h5 class="card-title"><%=listing.title%></h5>
-        <p class="card-text">
-            <%= listing.description %>
-            <br>
-            <strong>Price:</strong> &#8377; <%= listing.price.toLocaleString("en-IN") %> /night
-           
-            <i class="tax-info">&nbsp;&nbsp;+10%GST </i>
-            <br>
-            <strong>Location:</strong> <%= listing.location %>
-            <br>
-            <strong>Country:</strong> <%= listing.country %>
-        </p>
-        <!-- <a href="/listings" class="btn btn-primary"></a> -->
-    </div>
-</div>
-            </a>
-            <% } %>
-          <% } %>
+        </main>
     </div>
 </body>
 

@@ -1,95 +1,113 @@
 <% layout('layouts/boilerplate') %>
-<div class="row mt-4">
-    <div class="col-md-8 offset-md-2">
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
 
-        <div class="card show-card p-4">
+            <div class="card show-card p-4 shadow-sm">
 
-            <h3 class="card-title mb-3"><%= listingDetails.title %></h3>
+                <h3 class="card-title mb-3 text-center"><%= listingDetails.title %></h3>
 
-            <img src="<%= listingDetails.image.url%>" 
-                 class="card-img-top show-img" 
-                 alt="Listing Image" 
-                 onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\' viewBox=\'0 0 400 300\'><rect width=\'400\' height=\'300\' fill=\'%23f8f9fa\'/><text x=\'200\' y=\'150\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%236c757d\' font-family=\'Arial, sans-serif\' font-size=\'16\'>No Image Available</text></svg>';" />
-
-            <div class="card-body px-0 pt-4">
-
-                <p>Owned by <b><%= listingDetails.owner && listingDetails.owner.username ? listingDetails.owner.username : "HARSH SHARMA" %></b></></p>
-
-                <p><%= listingDetails.description %></p>
-
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item fs-5">&#8377; <%= listingDetails.price.toLocaleString("en-IN") %></li>
-                    <li class="list-group-item"><%= listingDetails.location %></li>
-                    <li class="list-group-item"><%= listingDetails.country %></li>
-                </ul>
-                <% if (currentUser && listingDetails.owner && listingDetails.owner._id && listingDetails.owner._id.toString() === currentUser._id.toString()) { %>
-                <div class="btns-container">
-                    <a href="/listings/<%= listingDetails._id %>/edit" class="btn btn-dark">Edit Listing</a>
-
-                    <form method="POST" action="/listings/<%= listingDetails._id %>?_method=DELETE">
-                        <button class="btn btn-danger">Delete Listing</button>
-                    </form>
+                <div class="text-center mb-3">
+                    <img src="<%= listingDetails.image.url%>" 
+                         class="card-img-top show-img zoomable-listing-img" 
+                         alt="Listing Image" 
+                         style="cursor: zoom-in;"
+                         onclick="openImageModal('<%= listingDetails.image.url%>')"
+                         onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\' viewBox=\'0 0 400 300\'><rect width=\'400\' height=\'300\' fill=\'%23f8f9fa\'/><text x=\'200\' y=\'150\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%236c757d\' font-family=\'Arial, sans-serif\' font-size=\'16\'>No Image Available</text></svg>';" />
                 </div>
-                <% } %>
+
+                <div class="card-body px-0 pt-4">
+
+                    <p class="text-center">Owned by <b><%= listingDetails.owner && listingDetails.owner.username ? listingDetails.owner.username : "HARSH SHARMA" %></b></p>
+
+                    <p class="text-center"><%= listingDetails.description %></p>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item fs-5 text-center">&#8377; <%= listingDetails.price.toLocaleString("en-IN") %></li>
+                        <li class="list-group-item text-center"><%= listingDetails.location %></li>
+                        <li class="list-group-item text-center"><%= listingDetails.country %></li>
+                    </ul>
+                    <% if (currentUser && listingDetails.owner && listingDetails.owner._id && listingDetails.owner._id.toString() === currentUser._id.toString()) { %>
+                    <div class="btns-container text-center mt-3">
+                        <a href="/listings/<%= listingDetails._id %>/edit" class="btn btn-dark me-2">Edit Listing</a>
+
+                        <form method="POST" action="/listings/<%= listingDetails._id %>?_method=DELETE" class="d-inline">
+                            <button class="btn btn-danger">Delete Listing</button>
+                        </form>
+                    </div>
+                    <% } %>
+                </div>
             </div>
-        </div>
 
-        <hr class="review-hr">
+            <hr class="review-hr">
 
-        <% if(currentUser) { %>
-        <div class="reviews-section">
-            <h4>Leave a Review</h4>
-            
-            <form action="/listings/<%= listingDetails._id %>/reviews" method="POST" class="needs-validation" novalidate>
-                <div class="mb-3 mt-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
-                </div>
+            <% if(currentUser) { %>
+            <div class="reviews-section">
+                <h4 class="text-center">Leave a Review</h4>
+                
+                <form action="/listings/<%= listingDetails._id %>/reviews" method="POST" class="needs-validation" novalidate aria-label="Leave a review form">
+                    <div class="mb-3 mt-3">
+                        <label for="rating" class="form-label">Rating</label>
+                        <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range" aria-valuenow="3" aria-valuemin="1" aria-valuemax="5" aria-label="Rating from 1 to 5">
+                    </div>
 
-                <div class="mb-3">
-                    <label for="comment" class="form-label">Comments</label>
-                    <textarea id="comment" name="review[comment]" class="form-control" rows="4" required placeholder="Write your review here..."></textarea>
-                    <div class="invalid-feedback">
-                        Please write a comment.
+                    <div class="mb-3">
+                        <label for="comment" class="form-label">Comments</label>
+                        <textarea id="comment" name="review[comment]" class="form-control" rows="4" required placeholder="Write your review here..." aria-label="Review comments"></textarea>
+                        <div class="invalid-feedback">
+                            Please write a comment.
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-dark mt-2 mb-3" aria-label="Submit review">Submit Review</button>
+                    </div>
+                </form>
+            </div>
+            <hr/>
+            <% } %>
+           <h4 class="mb-4 text-center">All Reviews</h4>
+
+            <div class="row justify-content-center">
+            <% for (const review of listingDetails.reviews) { %>
+                <div class="col-lg-4 col-md-6 col-sm-12 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">
+                                <% if (review.author && review.author.username) { %>
+                                    @<%= review.author.username %>
+                                <% } else { %>
+                                    <span class="text-muted">[deleted user]</span>
+                                <% } %>
+                            </h5>
+                            <p class="card-text">
+                                <% for(let i = 1; i <= 5; i++) { %>
+                                    <% if (i <= review.rating) { %>
+                                        <i class="fa-solid fa-star" style="color: gold;"></i>
+                                    <% } else { %>
+                                        <i class="fa-regular fa-star" style="color: gold;"></i>
+                                    <% } %>
+                                <% } %>
+                            </p>
+                            <p class="card-text"><%= review.comment %></p>
+                        </div>
+                        <% if (currentUser && review.author._id.equals(currentUser._id)) { %>
+                        <div class="card-footer text-center">
+                            <form action="/listings/<%= listingDetails._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mb-0">
+                                <button class="btn btn-sm btn-dark">Delete</button>
+                            </form>
+                        </div>
+                        <% } %>
                     </div>
                 </div>
-
-                <button type="submit" class="btn btn-dark mt-2 mb-3">Submit Review</button>
-            </form>
-        </div>
-        <hr/>
-        <% } %>
-       <h4 class="mb-4">All Reviews</h4>
-
-        <div class="row">
-        <% for (const review of listingDetails.reviews) { %>
-            <div class="card col-5 ms-3 mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <% if (review.author && review.author.username) { %>
-                            @<%= review.author.username %>
-                        <% } else { %>
-                            <span class="text-muted">[deleted user]</span>
-                        <% } %>
-                    </h5>
-                    <p class="card-text">
-                        <% for(let i = 1; i <= 5; i++) { %>
-                            <% if (i <= review.rating) { %>
-                                <i class="fa-solid fa-star" style="color: gold;"></i>
-                            <% } else { %>
-                                <i class="fa-regular fa-star" style="color: gold;"></i>
-                            <% } %>
-                        <% } %>
-                    </p>
-                    <p class="card-text"><%= review.comment %></p>
-                </div>
-                <% if (currentUser && review.author._id.equals(currentUser._id)) { %>
-                <form action="/listings/<%= listingDetails._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="mb-3">
-                    <button class="btn btn-sm btn-dark">Delete</button>
-                </form>
-                <% } %>
+            <% } %>
             </div>
-        <% } %>
         </div>
     </div>
+</div>
+
+<!-- Image Zoom Modal -->
+<div id="imageZoomModal" class="image-zoom-modal" style="display:none;">
+  <span class="image-zoom-close" onclick="closeImageModal()">&times;</span>
+  <img class="image-zoom-modal-content" id="zoomedListingImg" alt="Zoomed Listing Image" />
 </div>

@@ -3,11 +3,11 @@
     <div class="col offset-2">
         <h1 class="text-center">Create a New Listing</h1>
 <body>
-    <form method ="POST" action="/listings" novalidate class ="needs-validation " enctype="multipart/form-data">
+    <form method ="POST" action="/listings" novalidate class ="needs-validation " enctype="multipart/form-data" aria-label="Create new listing form">
         <br>
         <div>
             <label for="title" class ="form-label">Title:</label>
-            <input name="listing[title]" type="text" id="title" placeholder="Enter title" class ="form-control" required>
+            <input name="listing[title]" type="text" id="title" placeholder="Enter title" class ="form-control" required aria-label="Listing title">
             <div class="valid-feedback">Title looks good</div>
         </div>
         <br>
@@ -18,12 +18,12 @@
         <br> -->
         <div>
             <label for="image" class ="form-label">Upload Image:</label>
-             <input name ="listing[image][url]" type="file" class ="form-control" required>
+             <input name ="listing[image][url]" type="file" class ="form-control" required aria-label="Upload image">
         </div>
         <br>
         <div>
             <label for="description" class ="form-label">Description:</label>
-            <input name ="listing[description]" type="text" placeholder="Description"  class ="form-control" required>  
+            <input name ="listing[description]" type="text" placeholder="Description"  class ="form-control" required aria-label="Listing description">  
             <div class="invalid-feedback">Description should be short</div>
         </div>
         <br>
@@ -31,12 +31,12 @@
             <div class ="mb-3 col-md-4">
              <label for="price" class ="form-label">Price:</label>
             <input 
-                name ="listing[price]" type="number" placeholder="Price" class ="form-control" required>
+                name ="listing[price]" type="number" placeholder="Price" class ="form-control" required aria-label="Listing price">
                 <div class="invalid-feedback">Incorrect price</div>
             </div>
             <div class ="mb-3 col-md-8">
             <label for="country" class ="form-label">Country:</label>
-            <input name ="listing[country]" type="text" placeholder="Country" class ="form-control" required>
+            <input name ="listing[country]" type="text" placeholder="Country" class ="form-control" required aria-label="Listing country">
             </div>
         </div>
         
@@ -48,7 +48,7 @@
         <br>
         
         <br>
-        <button class="btn btn-dark add-btn" >Add</button>
+        <button type="submit" class="btn btn-primary" aria-label="Create listing">Create Listing</button>
         <br>
         <br>
     </form>

@@ -1,37 +1,411 @@
 <% layout('layouts/boilerplate') %>
+<style>
+    .password-strength {
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    .strength-meter {
+        height: 4px;
+        background-color: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+    .strength-bar {
+        height: 100%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+    }
+    .strength-weak { background-color: #dc3545; }
+    .strength-medium { background-color: #ffc107; }
+    .strength-strong { background-color: #28a745; }
+    .strength-very-strong { background-color: #20c997; }
+    .requirements {
+        font-size: 0.8em;
+        color: #6c757d;
+    }
+    .requirement {
+        margin-bottom: 2px;
+    }
+    .requirement.met {
+        color: #28a745;
+    }
+    .requirement.not-met {
+        color: #dc3545;
+    }
+    .input-group-text {
+        cursor: pointer;
+    }
+    .signup-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+    }
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    .form-label i {
+        margin-right: 8px;
+        color: #007bff;
+    }
+</style>
+
 <div class="col-12 text-center mb-4">
-    <h1 class="display-5 fw-bold" style="letter-spacing:2px; color:#2c3e50;">SignUp on Wanderlust</h1>
+    <h1 class="display-5 fw-bold" style="letter-spacing:2px; color:#2c3e50;">Join TravaCasa</h1>
+    <p class="lead text-muted">Create your account to start your journey</p>
 </div>
-<div class="col-6 offset-3">
-    <form action="/signup" method="POST" class="needs-validation" novalidate>
+
+<div class="signup-container">
+    <form action="/signup" method="POST" class="needs-validation" novalidate id="signupForm" aria-label="Signup form">
+        <!-- Username Field -->
         <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" class="form-control" id="username" name="username" required>
+            <label for="username" class="form-label">
+                <i class="fas fa-user"></i>Username
+            </label>
+            <input type="text" class="form-control" id="username" name="username" required 
+                   pattern="[a-zA-Z0-9_]{3,20}" 
+                   title="Username must be 3-20 characters and contain only letters, numbers, and underscores"
+                   aria-label="Username">
             <div class="valid-feedback">
-                Looks good!
+                Username looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please provide a valid username (3-20 characters, letters, numbers, and underscores only).
             </div>
         </div>
+
+        <!-- Email Field -->
         <div class="mb-3">
-            <label for="email" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="email" name="email" required>
+            <label for="email" class="form-label">
+                <i class="fas fa-envelope"></i>Email Address
+            </label>
+            <input type="email" class="form-control" id="email" name="email" required aria-label="Email address">
             <div class="valid-feedback">
                 Email looks valid!
             </div>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-            <div class="valid-feedback">
-                Password looks good!
+            <div class="invalid-feedback">
+                Please provide a valid email address.
             </div>
         </div>
+
+        <!-- Password Field -->
         <div class="mb-3">
-            <label for="confirmPassword" class="form-label">Confirm Password</label>
-            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+            <label for="password" class="form-label">
+                <i class="fas fa-lock"></i>Password
+            </label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="password" name="password" required 
+                       minlength="8" autocomplete="new-password" aria-label="Password">
+                <span class="input-group-text" onclick="togglePasswordVisibility('password')" title="Show/Hide Password">
+                    <i class="fas fa-eye" id="password-toggle-icon"></i>
+                </span>
+            </div>
+            <div class="password-strength" id="password-strength">
+                <div class="strength-meter">
+                    <div class="strength-bar" id="strength-bar"></div>
+                </div>
+                <div class="strength-text" id="strength-text">Password strength: <span id="strength-level">Very Weak</span></div>
+                <div class="requirements" id="password-requirements">
+                    <div class="requirement" id="req-length">✗ At least 8 characters</div>
+                    <div class="requirement" id="req-uppercase">✗ At least one uppercase letter</div>
+                    <div class="requirement" id="req-lowercase">✗ At least one lowercase letter</div>
+                    <div class="requirement" id="req-number">✗ At least one number</div>
+                    <div class="requirement" id="req-special">✗ At least one special character</div>
+                </div>
+            </div>
+            <div class="valid-feedback">
+                Password strength is good!
+            </div>
+            <div class="invalid-feedback">
+                Password must be at least 8 characters long and meet strength requirements.
+            </div>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">
+                <i class="fas fa-lock"></i>Confirm Password
+            </label>
+            <div class="input-group">
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required aria-label="Confirm password">
+                <span class="input-group-text" onclick="togglePasswordVisibility('confirmPassword')" title="Show/Hide Password">
+                    <i class="fas fa-eye" id="confirmPassword-toggle-icon"></i>
+                </span>
+            </div>
             <div class="valid-feedback">
                 Passwords match!
             </div>
+            <div class="invalid-feedback" id="confirm-password-feedback">
+                Passwords do not match.
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Sign Up</button>
+
+        <!-- Terms and Conditions -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="terms" required aria-label="Agree to terms and conditions">
+            <label class="form-check-label" for="terms">
+                I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+            </label>
+            <div class="invalid-feedback">
+                You must agree to the terms and conditions.
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary" id="submitBtn" disabled aria-label="Create account">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </div>
+
+        <!-- Login Link -->
+        <div class="text-center mt-3">
+            <p class="text-muted">Already have an account? <a href="/login">Sign in here</a></p>
+        </div>
     </form>
 </div>
+
+<!-- Toast Container for Notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+    // Password visibility toggle
+    function togglePasswordVisibility(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const toggleIcon = document.getElementById(fieldId + '-toggle-icon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthLevel = document.getElementById('strength-level');
+        
+        // Check requirements
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        // Update requirement indicators
+        updateRequirement('req-length', requirements.length);
+        updateRequirement('req-uppercase', requirements.uppercase);
+        updateRequirement('req-lowercase', requirements.lowercase);
+        updateRequirement('req-number', requirements.number);
+        updateRequirement('req-special', requirements.special);
+        
+        // Calculate strength
+        const metRequirements = Object.values(requirements).filter(Boolean).length;
+        let strength = 0;
+        let strengthText = 'Very Weak';
+        let strengthClass = 'strength-weak';
+        
+        if (metRequirements === 5) {
+            strength = 100;
+            strengthText = 'Very Strong';
+            strengthClass = 'strength-very-strong';
+        } else if (metRequirements >= 4) {
+            strength = 80;
+            strengthText = 'Strong';
+            strengthClass = 'strength-strong';
+        } else if (metRequirements >= 3) {
+            strength = 60;
+            strengthText = 'Medium';
+            strengthClass = 'strength-medium';
+        } else if (metRequirements >= 1) {
+            strength = 30;
+            strengthText = 'Weak';
+            strengthClass = 'strength-weak';
+        }
+        
+        // Update strength bar
+        strengthBar.style.width = strength + '%';
+        strengthBar.className = 'strength-bar ' + strengthClass;
+        strengthLevel.textContent = strengthText;
+        
+        // Check confirm password match
+        checkPasswordMatch();
+        updateSubmitButton();
+    });
+    
+    // Update requirement indicator
+    function updateRequirement(reqId, isMet) {
+        const element = document.getElementById(reqId);
+        if (isMet) {
+            element.classList.add('met');
+            element.classList.remove('not-met');
+            element.textContent = element.textContent.replace('✗', '✓');
+        } else {
+            element.classList.add('not-met');
+            element.classList.remove('met');
+            element.textContent = element.textContent.replace('✓', '✗');
+        }
+    }
+    
+    // Password match checker
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const confirmField = document.getElementById('confirmPassword');
+        
+        if (confirmPassword === '') {
+            confirmField.classList.remove('is-valid', 'is-invalid');
+            return;
+        }
+        
+        if (password === confirmPassword) {
+            confirmField.classList.add('is-valid');
+            confirmField.classList.remove('is-invalid');
+        } else {
+            confirmField.classList.add('is-invalid');
+            confirmField.classList.remove('is-valid');
+        }
+    }
+    
+    // Check password match on confirm password input
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        checkPasswordMatch();
+        updateSubmitButton();
+    });
+    
+    // Update submit button state
+    function updateSubmitButton() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const terms = document.getElementById('terms').checked;
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Check if all fields are filled, passwords match, and terms are accepted
+        const isValid = username.length >= 3 && 
+                       email.includes('@') && 
+                       password.length >= 8 && 
+                       password === confirmPassword && 
+                       terms;
+        
+        submitBtn.disabled = !isValid;
+    }
+    
+    // Enable submit button when terms are checked
+    document.getElementById('terms').addEventListener('change', updateSubmitButton);
+    
+    // Update submit button on username and email input
+    document.getElementById('username').addEventListener('input', updateSubmitButton);
+    document.getElementById('email').addEventListener('input', updateSubmitButton);
+    
+    // Form validation
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            showToast('Passwords do not match!', 'error');
+            return;
+        }
+        
+        // Check password strength
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+        
+        const metRequirements = Object.values(requirements).filter(Boolean).length;
+        if (metRequirements < 4) {
+            showToast('Password must meet at least 4 out of 5 requirements!', 'error');
+            return;
+        }
+        
+        // If all validations pass, submit the form
+        form.submit();
+    });
+    
+    // Toast notification function
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : 'success'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        toastContainer.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        // Remove toast after it's hidden
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+    
+    // Initialize Bootstrap validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>

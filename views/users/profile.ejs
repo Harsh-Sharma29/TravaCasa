@@ -1,0 +1,61 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container">
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-user-circle"></i>
+                        User Profile
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Username</dt>
+                        <dd class="col-sm-9"><%= user.username %></dd>
+
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9"><%= user.email %></dd>
+
+                        <dt class="col-sm-3">Joined</dt>
+                        <dd class="col-sm-9"><%= new Date(user.createdAt).toLocaleDateString() %></dd>
+                    </dl>
+
+                    <hr>
+
+                    <h4>My Listings</h4>
+                    <% if (userListings.length > 0) { %>
+                        <div class="list-group">
+                            <% userListings.forEach(listing => { %>
+                                <a href="/listings/<%= listing._id %>" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-home"></i>
+                                    <strong><%= listing.title %></strong> - <%= listing.location %>
+                                </a>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">You haven't listed any properties yet.</p>
+                    <% } %>
+
+                    <hr>
+
+                    <h4>My Reviews</h4>
+                    <% if (userReviews.length > 0) { %>
+                        <div class="list-group">
+                            <% userReviews.forEach(review => { %>
+                                <div class="list-group-item">
+                                    <p class="mb-1">Rating: <%= review.rating %> <i class="fas fa-star" style="color: #fbc02d;"></i></p>
+                                    <small class="text-muted">Review for <a href="/listings/<%= review.listing._id %>"><%= review.listing.title %></a></small>
+                                    <p><%= review.comment %></p>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p class="text-muted">You haven't posted any reviews yet.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
