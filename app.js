@@ -1,4 +1,5 @@
 const express = require('express');
+const fetch = require("node-fetch");
 const path = require('path');
 const mongoose = require('mongoose');
 const Listing = require("./models/listing.js");
@@ -15,6 +16,7 @@ const flash = require("connect-flash");
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require("./models/user.js");
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 const multer = require('multer');
 const fs = require('fs');
@@ -23,29 +25,30 @@ const { Client } = require('@googlemaps/google-maps-services-js');
 const { processVoiceQuery, searchWebForTravelInfo, generateSearchSuggestions, findNearbyListings } = require('./utils/searchHelpers');
 const { isLoggedIn } = require('./middleware/auth');
 
-// Import LangChain components for Llama2 integration
-const { ChatOllama } = require('@langchain/ollama');
-const { PromptTemplate } = require('@langchain/core/prompts');
-const { StringOutputParser } = require('@langchain/core/output_parsers');
-const { RunnableSequence } = require('@langchain/core/runnables');
-const { ConversationSummaryMemory } = require('langchain/memory');
-const { ChatMessageHistory } = require('langchain/stores/message/in_memory');
+// Ollama Llama2 integration (direct API calls)
+// Note: Using direct Ollama API instead of LangChain for better control
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadsDir = path.join(__dirname, 'public', 'uploads');
-        if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
-        }
-        cb(null, uploadsDir);
-    },
-    filename: function (req, file, cb) {
-        // Generate unique filename with timestamp
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
+// Cloudinary configuration
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'your_cloud_name',
+    api_key: process.env.CLOUDINARY_API_KEY || 'your_api_key',
+    api_secret: process.env.CLOUDINARY_API_SECRET || 'your_api_secret'
+});
+
+// Configure multer with Cloudinary storage
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'travacasa-listings',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+        transformation: [{ width: 1000, height: 1000, crop: 'limit' }]
     }
 });
+
 
 const upload = multer({ 
     storage: storage,
@@ -64,12 +67,23 @@ const upload = multer({
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // connecting to the database
 const dbURL = process.env.ATLASDB_URL;
+
+// Validate required environment variables
+if (!dbURL) {
+    console.error("❌ ATLASDB_URL environment variable is required!");
+    process.exit(1);
+}
+
+if (!process.env.SECRET) {
+    console.error("❌ SECRET environment variable is required for session security!");
+    process.exit(1);
+}
+
 main()
     .then(() => {
         console.log("connected to database")
@@ -78,8 +92,16 @@ main()
         console.log("error in connecting to database", err)
     });
 async function main() {
-    await mongoose.connect(dbURL);
+    try {
+        await mongoose.connect(dbURL);
+        console.log("✅ Connected to MongoDB Atlas successfully");
+    } catch (err) {
+        console.error("❌ Error connecting to database:", err.message);
+        console.error("💡 Check ATLASDB_URL and IP whitelist in MongoDB Atlas");
+        process.exit(1);
+    }
 }
+
 
 // Set the view engine to EJS
 app.set('view engine', 'ejs');
@@ -101,14 +123,17 @@ store.on("error", function (e) {
 
 const sessionOptions = {
     store,
-    secret: process.env.SECRET, // Replace with a strong secret in production
+    secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Changed to false for production security
+    name: 'sessionId', // Custom session name for security
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-    }, // Set to true if using HTTPS
+        secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // CSRF protection
+    },
 };
 
 app.use(session(sessionOptions));
@@ -123,6 +148,27 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// Rate limiting for API endpoints
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Stricter rate limiting for chatbot endpoint
+const chatbotLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 10, // Limit each IP to 10 chatbot requests per minute
+    message: 'Too many chatbot requests, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Apply rate limiting to API routes
+app.use('/api/', apiLimiter);
+
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
     res.locals.success = req.flash("success");
@@ -131,15 +177,316 @@ app.use((req, res, next) => {
 });
 
 // port configuration
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log("Server is running on port ");
+    console.log(`🚀 Server is running on port ${PORT}`);
 });
+
+/* ===============================
+   AI CHATBOT API (OLLAMA) - WITH MONGODB INTEGRATION
+================================ */
+
+// Helper function to detect if user is asking about properties/listings
+function isPropertyQuery(message) {
+  const lowerMessage = message.toLowerCase();
+  const propertyKeywords = [
+    'property', 'properties', 'listing', 'listings', 'accommodation', 'accommodations',
+    'place', 'places', 'stay', 'rental', 'rentals', 'hotel', 'hotels', 'apartment', 'apartments',
+    'villa', 'villas', 'house', 'houses', 'room', 'rooms', 'find', 'search', 'show', 'available',
+    'location', 'locations', 'city', 'cities', 'country', 'countries', 'price', 'prices',
+    'cheap', 'expensive', 'budget', 'affordable', 'near', 'nearby', 'in', 'at'
+  ];
+  
+  return propertyKeywords.some(keyword => lowerMessage.includes(keyword));
+}
+
+// Helper function to extract search terms from user message
+function extractSearchTerms(message) {
+  const lowerMessage = message.toLowerCase();
+  const searchTerms = [];
+  
+  // Remove common stop words and property-related words for better extraction
+  const stopWords = ['the', 'and', 'for', 'are', 'with', 'this', 'that', 'find', 'show', 'search', 
+                     'want', 'need', 'looking', 'for', 'a', 'an', 'in', 'at', 'near', 'around',
+                     'apartment', 'house', 'villa', 'hotel', 'property', 'listing', 'properties', 'listings',
+                     'places', 'place', 'stay', 'stays', 'available', 'availability'];
+  
+  // Extract location names (capitalized words, likely place names)
+  const words = message.split(/\s+/);
+  const locationWords = [];
+  
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i].replace(/[.,!?;:]/g, ''); // Remove punctuation
+    const lowerWord = word.toLowerCase();
+    
+    // Skip stop words and very short words
+    if (stopWords.includes(lowerWord) || word.length < 2) {
+      continue;
+    }
+    
+    // If word starts with capital letter (likely a location name)
+    if (word[0] === word[0].toUpperCase() && word[0] !== word[0].toLowerCase()) {
+      locationWords.push(word);
+    } else if (locationWords.length > 0) {
+      // Continue building location name if previous word was capitalized
+      locationWords.push(word);
+    }
+  }
+  
+  // Add location phrases
+  if (locationWords.length > 0) {
+    // Group consecutive capitalized words as potential location names
+    let currentLocation = [];
+    for (let i = 0; i < locationWords.length; i++) {
+      if (locationWords[i][0] === locationWords[i][0].toUpperCase()) {
+        currentLocation.push(locationWords[i]);
+      } else {
+        if (currentLocation.length > 0) {
+          searchTerms.push(currentLocation.join(' '));
+          currentLocation = [];
+        }
+        currentLocation.push(locationWords[i]);
+      }
+    }
+    if (currentLocation.length > 0) {
+      searchTerms.push(currentLocation.join(' '));
+    }
+  }
+  
+  // Extract meaningful keywords (longer words that aren't stop words)
+  const keywords = words
+    .map(w => w.replace(/[.,!?;:]/g, '').toLowerCase())
+    .filter(w => w.length > 3 && !stopWords.includes(w) && !searchTerms.some(st => st.toLowerCase().includes(w)))
+    .slice(0, 3);
+  
+  searchTerms.push(...keywords);
+  
+  // Extract price-related terms (but don't add as search term, handled separately)
+  // This is just for reference in the query function
+  
+  // If still no terms, use filtered words from message
+  if (searchTerms.length === 0) {
+    const filteredWords = words
+      .map(w => w.replace(/[.,!?;:]/g, ''))
+      .filter(w => w.length > 2 && !stopWords.includes(w.toLowerCase()));
+    if (filteredWords.length > 0) {
+      searchTerms.push(filteredWords.slice(0, 2).join(' '));
+    }
+  }
+  
+  // Remove duplicates and empty strings
+  return [...new Set(searchTerms.filter(term => term.trim().length > 0))];
+}
+
+// Helper function to query MongoDB for listings based on user query
+async function queryListingsForChatbot(message) {
+  try {
+    const searchTerms = extractSearchTerms(message);
+    const lowerMessage = message.toLowerCase();
+    
+    // Build search query
+    let query = {};
+    
+    // Check if it's a price-related query
+    const isBudgetQuery = lowerMessage.includes('cheap') || lowerMessage.includes('budget') || lowerMessage.includes('affordable');
+    const isLuxuryQuery = lowerMessage.includes('expensive') || lowerMessage.includes('luxury') || lowerMessage.includes('premium');
+    
+    if (searchTerms.length > 0) {
+      // Search in title, description, location, and country using regex
+      // Combine all search terms into one regex pattern for better matching
+      const searchPattern = searchTerms.join('|');
+      query.$or = [
+        { title: { $regex: searchPattern, $options: 'i' } },
+        { description: { $regex: searchPattern, $options: 'i' } },
+        { location: { $regex: searchPattern, $options: 'i' } },
+        { country: { $regex: searchPattern, $options: 'i' } }
+      ];
+    }
+    
+    // Apply price filter if mentioned
+    if (isBudgetQuery) {
+      // Budget: less than average price (assuming average around 100-150)
+      query.price = { $lt: 150 };
+    } else if (isLuxuryQuery) {
+      // Luxury: higher than average
+      query.price = { $gt: 200 };
+    }
+    
+    // Execute query
+    let listings;
+    if (Object.keys(query).length > 0) {
+      listings = await Listing.find(query)
+        .limit(5)
+        .sort({ createdAt: -1 })
+        .populate('owner', 'username')
+        .populate('reviews');
+    } else {
+      // If no specific search terms, return recent listings
+      listings = await Listing.find({})
+        .limit(5)
+        .sort({ createdAt: -1 })
+        .populate('owner', 'username')
+        .populate('reviews');
+    }
+    
+    // Format listings for AI prompt
+    return listings.map(listing => {
+      const avgRating = listing.reviews && listing.reviews.length > 0
+        ? (listing.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / listing.reviews.length).toFixed(1)
+        : 'No ratings yet';
+      
+      return {
+        id: listing._id.toString(),
+        title: listing.title,
+        description: listing.description.substring(0, 150) + (listing.description.length > 150 ? '...' : ''),
+        location: listing.location,
+        country: listing.country,
+        price: listing.price,
+        rating: avgRating,
+        reviewCount: listing.reviews ? listing.reviews.length : 0,
+        image: listing.image?.url || ''
+      };
+    });
+  } catch (error) {
+    console.error('Error querying listings for chatbot:', error);
+    return [];
+  }
+}
+
+// Enhanced chatbot endpoint with MongoDB integration
+app.post("/api/chatbot", chatbotLimiter, async (req, res) => {
+  try {
+    const { message, sessionId = "default", context = [] } = req.body;
+
+    if (!message) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Message is required" });
+    }
+
+    // Check if user is asking about properties
+    const isPropertyRelated = isPropertyQuery(message);
+    let databaseResults = [];
+    let databaseContext = '';
+
+    // Query MongoDB if it's a property-related query
+    if (isPropertyRelated) {
+      databaseResults = await queryListingsForChatbot(message);
+      
+      if (databaseResults.length > 0) {
+        databaseContext = `\n\nAVAILABLE PROPERTIES FROM DATABASE:\n${databaseResults.map((listing, index) => 
+          `${index + 1}. ${listing.title}
+   - Location: ${listing.location}, ${listing.country}
+   - Price: $${listing.price} per night
+   - Rating: ${listing.rating} (${listing.reviewCount} reviews)
+   - Description: ${listing.description}
+   - Property ID: ${listing.id}`
+        ).join('\n\n')}\n\nIMPORTANT: Reference these actual properties when answering. Include specific details like location, price, and ratings. If user asks about a specific property, use the Property ID to help them find it.`;
+      } else {
+        databaseContext = '\n\nNOTE: No properties found matching the user\'s query in the database. Apologize and suggest they try different search terms or browse all listings.';
+      }
+    }
+
+    // Build enhanced prompt with database context
+    const prompt = `You are TravaCasa AI Assistant, an expert AI assistant for a travel and accommodation platform.
+You help users find properties, bookings, and travel help.
+Be polite, helpful, and concise. Use emojis where appropriate to make responses engaging.
+
+${databaseContext}
+
+Conversation Context:
+${context.map(c => `- ${c}`).join("\n")}
+
+User: ${message}
+Assistant:`;
+
+    // Try Ollama first
+    let aiResponse = null;
+    let aiSource = "Ollama Llama2";
+    
+    try {
+      const ollamaBaseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+      const ollamaResponse = await fetch(
+        `${ollamaBaseUrl}/api/generate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "llama2",
+            prompt,
+            stream: false,
+          }),
+        }
+      );
+
+      if (ollamaResponse.ok) {
+        const data = await ollamaResponse.json();
+        if (data.response) {
+          aiResponse = data.response;
+        }
+      }
+    } catch (ollamaError) {
+      console.warn("⚠️ Ollama not available:", ollamaError.message);
+    }
+
+    // Fallback to Hugging Face if Ollama fails
+    if (!aiResponse && process.env.HUGGINGFACE_API_KEY) {
+      try {
+        console.log("🔄 Trying Hugging Face API as fallback...");
+        aiResponse = await callHuggingFaceAPI(message, prompt);
+        if (aiResponse && !aiResponse.includes("Hugging Face API")) {
+          aiSource = "Hugging Face AI";
+        } else {
+          aiResponse = null; // Reset if HF returned error message
+        }
+      } catch (hfError) {
+        console.warn("⚠️ Hugging Face API failed:", hfError.message);
+      }
+    }
+
+    // Final fallback to contextual/database response
+    if (!aiResponse) {
+      if (databaseResults.length > 0) {
+        // Create a response based on database results
+        aiResponse = `I found ${databaseResults.length} ${databaseResults.length === 1 ? 'property' : 'properties'} that might interest you:\n\n`;
+        databaseResults.forEach((listing, index) => {
+          aiResponse += `${index + 1}. **${listing.title}** 🏡\n`;
+          aiResponse += `   📍 Location: ${listing.location}, ${listing.country}\n`;
+          aiResponse += `   💰 Price: $${listing.price} per night\n`;
+          aiResponse += `   ⭐ Rating: ${listing.rating} (${listing.reviewCount} ${listing.reviewCount === 1 ? 'review' : 'reviews'})\n`;
+          aiResponse += `   📝 ${listing.description}\n\n`;
+        });
+        aiResponse += `You can view more details by visiting the property page. Would you like to know more about any specific property?`;
+        aiSource = "Database + Contextual Response";
+      } else {
+        aiResponse = getContextualResponse(message);
+        aiSource = "Contextual Response";
+      }
+    }
+
+    res.json({
+      success: true,
+      message: aiResponse,
+      aiSource: aiSource,
+      databaseResults: isPropertyRelated ? databaseResults : undefined,
+      hasDatabaseData: databaseResults.length > 0
+    });
+  } catch (err) {
+    console.error("❌ Chatbot Error:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "AI service unavailable. Please try again later.",
+    });
+  }
+});
+
 
 // Signup form route
 app.get("/signup", (req, res) => {
     res.render("users/signup.ejs");
 });
+
 
 // Signup POST route
 app.post("/signup", wrapAsync(async (req, res) => {
@@ -556,49 +903,6 @@ app.get("/api/web-search", wrapAsync(async (req, res) => {
     }
 }));
 
-// Chatbot API endpoint with LangChain and Llama2 integration
-app.post("/api/chatbot", wrapAsync(async (req, res) => {
-    try {
-        const { message } = req.body;
-        
-        if (!message) {
-            return res.status(400).json({
-                success: false,
-                error: 'Message is required'
-            });
-        }
-
-        let botResponse;
-        try {
-            // Try LangChain with Llama2 first
-            botResponse = await callLangChainLlama2(message);
-        } catch (aiError) {
-            console.error('LangChain Llama2 error:', aiError);
-            try {
-                // Fallback to Hugging Face API
-                botResponse = await callHuggingFaceAPI(message);
-            } catch (hfError) {
-                console.error('Hugging Face API error:', hfError);
-                // Final fallback to contextual response
-                botResponse = getContextualResponse(message);
-            }
-        }
-
-        res.json({
-            success: true,
-            message: botResponse,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        console.error('Chatbot API error:', error);
-        res.status(500).json({ 
-            success: false,
-            error: 'Failed to process message',
-            message: "I apologize, but I'm having trouble responding right now. Please try again later."
-        });
-    }
-}));
-
 //Read(Show) route
 app.get("/listings/:id", wrapAsync(async (req, res) => {
     let { id } = req.params;
@@ -645,8 +949,8 @@ app.post("/listings", isLoggedIn, upload.single('listing[image][url]'), wrapAsyn
         // If a file was uploaded, set the image url and filename
         if (req.file) {
             newListing.image = {
-                url: `/uploads/${req.file.filename}`,
-                filename: req.file.filename
+                url: req.file.path, // Cloudinary URL
+                filename: req.file.filename || req.file.originalname
             };
         } else {
             // Set default image if no file uploaded
@@ -660,12 +964,12 @@ app.post("/listings", isLoggedIn, upload.single('listing[image][url]'), wrapAsyn
         req.flash("success", "New Listing Created!");
         res.redirect("/listings");
     } catch (error) {
-        // If there's an error, delete the uploaded file
-        if (req.file) {
+        // If there's an error, delete the uploaded file from Cloudinary
+        if (req.file && req.file.public_id) {
             try {
-                fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-                console.error('Error deleting uploaded file:', unlinkError);
+                await cloudinary.uploader.destroy(req.file.public_id);
+            } catch (destroyError) {
+                console.error('Error deleting uploaded file from Cloudinary:', destroyError);
             }
         }
         throw error;
@@ -707,35 +1011,39 @@ app.put("/listings/:id", isLoggedIn,
 
         // Handle new file upload
         if (req.file) {
-            // If there was an old image file, delete it
+            // If there was an old image file, delete it from Cloudinary
             if (listing.image && listing.image.filename && listing.image.filename !== '') {
-                const oldImagePath = path.join(__dirname, 'public', 'uploads', listing.image.filename);
                 try {
-                    if (fs.existsSync(oldImagePath)) {
-                        fs.unlinkSync(oldImagePath);
-                        console.log(`Deleted old image: ${oldImagePath}`);
+                    // Extract public_id from the old image URL if it's a Cloudinary URL
+                    const oldImageUrl = listing.image.url;
+                    if (oldImageUrl.includes('cloudinary.com')) {
+                        const publicId = oldImageUrl.split('/').pop().split('.')[0];
+                        await cloudinary.uploader.destroy(publicId);
+                        console.log(`Deleted old image from Cloudinary: ${publicId}`);
                     }
-                } catch (unlinkError) {
-                    console.error(`Error deleting old image ${oldImagePath}:`, unlinkError);
+                } catch (destroyError) {
+                    console.error(`Error deleting old image from Cloudinary:`, destroyError);
                 }
             }
 
             // Update image details with the newly uploaded file
             updatedListingData.image = {
-                url: `/uploads/${req.file.filename}`,
-                filename: req.file.filename
+                url: req.file.path, // Cloudinary URL
+                filename: req.file.filename || req.file.originalname
             };
         } else if (req.body.removeImage === 'on') {
             // If user wants to remove the image
             if (listing.image && listing.image.filename && listing.image.filename !== '') {
-                const oldImagePath = path.join(__dirname, 'public', 'uploads', listing.image.filename);
                 try {
-                    if (fs.existsSync(oldImagePath)) {
-                        fs.unlinkSync(oldImagePath);
-                        console.log(`Deleted old image due to removal: ${oldImagePath}`);
+                    // Extract public_id from the old image URL if it's a Cloudinary URL
+                    const oldImageUrl = listing.image.url;
+                    if (oldImageUrl.includes('cloudinary.com')) {
+                        const publicId = oldImageUrl.split('/').pop().split('.')[0];
+                        await cloudinary.uploader.destroy(publicId);
+                        console.log(`Deleted old image from Cloudinary due to removal: ${publicId}`);
                     }
-                } catch (unlinkError) {
-                    console.error(`Error deleting old image (removal case) ${oldImagePath}:`, unlinkError);
+                } catch (destroyError) {
+                    console.error(`Error deleting old image from Cloudinary (removal case):`, destroyError);
                 }
             }
             updatedListingData.image = {
@@ -758,12 +1066,12 @@ app.put("/listings/:id", isLoggedIn,
         req.flash("success", "Listing Updated!");
         res.redirect(`/listings/${id}`);
     } catch (error) {
-        // If there's an error, delete the uploaded file
-        if (req.file) {
+        // If there's an error, delete the uploaded file from Cloudinary
+        if (req.file && req.file.public_id) {
             try {
-                fs.unlinkSync(req.file.path);
-            } catch (unlinkError) {
-                console.error('Error deleting uploaded file:', unlinkError);
+                await cloudinary.uploader.destroy(req.file.public_id);
+            } catch (destroyError) {
+                console.error('Error deleting uploaded file from Cloudinary:', destroyError);
             }
         }
         throw error;
@@ -785,16 +1093,16 @@ app.delete("/listings/:id", isLoggedIn, wrapAsync(async (req, res) => {
         return res.redirect(`/listings/${id}`);
     }
     
-    // Delete the associated image file if it exists
-    if (listing.image && listing.image.filename && listing.image.filename !== '') {
-        const imagePath = path.join(__dirname, 'public', 'uploads', listing.image.filename);
+    // Delete the associated image file from Cloudinary if it exists
+    if (listing.image && listing.image.url && listing.image.url.includes('cloudinary.com')) {
         try {
-            if (fs.existsSync(imagePath)) {
-                fs.unlinkSync(imagePath);
-                console.log(`Deleted image file: ${imagePath}`);
-            }
-        } catch (unlinkError) {
-            console.error(`Error deleting image file ${imagePath}:`, unlinkError);
+            // Extract public_id from the image URL
+            const imageUrl = listing.image.url;
+            const publicId = imageUrl.split('/').pop().split('.')[0];
+            await cloudinary.uploader.destroy(publicId);
+            console.log(`Deleted image from Cloudinary: ${publicId}`);
+        } catch (destroyError) {
+            console.error(`Error deleting image from Cloudinary:`, destroyError);
         }
     }
     
@@ -885,339 +1193,97 @@ async function getNearbyAttractions(latitude, longitude, type) {
     }
 }
 
-// Enhanced AI Chatbot with Advanced Features
-class AdvancedChatbotAI {
-    constructor() {
-        this.conversationHistory = new Map(); // Store conversation context
-        this.userPreferences = new Map(); // Store user preferences
-        this.intentClassifier = new IntentClassifier();
-        this.entityExtractor = new EntityExtractor();
-        this.responseGenerator = new ResponseGenerator();
-    }
-
-    async processMessage(userMessage, sessionId = 'default') {
-        try {
-            // Get conversation context
-            const context = this.getConversationContext(sessionId);
-            
-            // Classify intent and extract entities
-            const intent = await this.intentClassifier.classify(userMessage, context);
-            const entities = await this.entityExtractor.extract(userMessage);
-            
-            // Update conversation context
-            this.updateConversationContext(sessionId, { userMessage, intent, entities });
-            
-            // Generate response based on intent and entities
-            const response = await this.responseGenerator.generate(intent, entities, context);
-            
-            // Update context with bot response
-            this.updateConversationContext(sessionId, { botResponse: response });
-            
-            return response;
-        } catch (error) {
-            console.error('Advanced AI processing failed:', error);
-            throw error;
-        }
-    }
-
-    getConversationContext(sessionId) {
-        return this.conversationHistory.get(sessionId) || { messages: [], intent: null, entities: [] };
-    }
-
-    updateConversationContext(sessionId, data) {
-        const context = this.getConversationContext(sessionId);
-        context.messages.push(data);
-        // Keep only last 10 messages for context
-        if (context.messages.length > 10) {
-            context.messages = context.messages.slice(-10);
-        }
-        this.conversationHistory.set(sessionId, context);
-    }
-}
-
-// Intent Classification System
-class IntentClassifier {
-    constructor() {
-        this.intents = {
-            greeting: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening'],
-            booking: ['book', 'reserve', 'reservation', 'availability', 'available'],
-            search: ['find', 'search', 'look for', 'show me', 'properties'],
-            pricing: ['price', 'cost', 'expensive', 'cheap', 'budget', 'how much'],
-            cancellation: ['cancel', 'refund', 'change', 'modify', 'policy'],
-            support: ['help', 'support', 'assistance', 'problem', 'issue'],
-            amenities: ['amenities', 'features', 'facilities', 'services', 'wifi'],
-            location: ['location', 'where', 'near', 'around', 'city', 'country'],
-            travel_planning: ['plan', 'trip', 'vacation', 'holiday', 'travel'],
-            reviews: ['review', 'rating', 'feedback', 'quality', 'recommend'],
-            general: ['what', 'how', 'why', 'when', '?', 'tell me', 'explain', 'help me', 'tell me about', 'tell me more about']
-        };
-    }
-
-    async classify(message, context) {
-        const lowerMessage = message.toLowerCase();
-        let maxScore = 0;
-        let detectedIntent = 'general';
-
-        // Check for intent keywords
-        for (const [intent, keywords] of Object.entries(this.intents)) {
-            const score = keywords.reduce((acc, keyword) => {
-                return acc + (lowerMessage.includes(keyword) ? 1 : 0);
-            }, 0);
-            
-            if (score > maxScore) {
-                maxScore = score;
-                detectedIntent = intent;
-            }
-        }
-
-        // Context-based intent refinement
-        if (context.messages.length > 0) {
-            const lastIntent = context.messages[context.messages.length - 1]?.intent;
-            if (lastIntent && this.isFollowUpIntent(lowerMessage, lastIntent)) {
-                detectedIntent = lastIntent;
-            }
-        }
-
-        return detectedIntent;
-    }
-
-    isFollowUpIntent(message, lastIntent) {
-        const followUps = {
-            booking: ['yes', 'sure', 'okay', 'proceed', 'continue'],
-            search: ['more', 'other', 'different', 'another'],
-            pricing: ['compare', 'cheaper', 'better', 'alternative']
-        };
-        
-        return followUps[lastIntent]?.some(word => message.includes(word)) || false;
-    }
-}
-
-// Entity Extraction System
-class EntityExtractor {
-    constructor() {
-        this.patterns = {
-            location: /\b(?:in|at|near|around)\s+([a-zA-Z\s]+?)\b/gi,
-            dates: /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/g,
-            numbers: /\b\d+\b/g,
-            propertyType: /\b(apartment|house|villa|hotel|resort|cabin|condo)s?\b/gi,
-            amenities: /\b(wifi|pool|parking|kitchen|gym|spa|balcony|garden)\b/gi,
-            priceRange: /\$\d+(?:,\d{3})*(?:\.\d{2})?/g
-        };
-    }
-
-    async extract(message) {
-        const entities = {};
-        
-        for (const [type, pattern] of Object.entries(this.patterns)) {
-            const matches = [...message.matchAll(pattern)];
-            if (matches.length > 0) {
-                entities[type] = matches.map(match => match[1] || match[0]).filter(Boolean);
-            }
-        }
-        
-        return entities;
-    }
-}
-
-// Advanced Response Generation System
-class ResponseGenerator {
-    constructor() {
-        this.templates = {
-            greeting: [
-                "Hello! How can I help you today?",
-                "Hi there! What can I do for you?",
-                "Hey! How can I assist you?"
-            ],
-            booking: [
-                "I'd love to help you with your booking! 🏨 Let me guide you through our simple reservation process. What type of property and dates are you considering?",
-                "Great choice! 📅 I'll help you secure the perfect accommodation. Do you have specific dates and location preferences?",
-                "Perfect! Let's get you booked. 🎯 I'll need some details about your travel dates, group size, and preferred location."
-            ],
-            search: [
-                "I'm excited to help you find the perfect property! 🔍 What type of accommodation are you looking for and in which location?",
-                "Let's find your ideal stay! 🏡 Tell me about your preferences - location, property type, and any specific amenities you need.",
-                "I'll help you discover amazing properties! 🌟 What's your destination and what kind of experience are you looking for?"
-            ],
-            pricing: [
-                "I'll help you understand our pricing! 💰 Property costs vary based on location, size, season, and amenities. What's your budget range?",
-                "Let me break down pricing for you! 📊 Rates depend on several factors. What type of property and location are you considering?",
-                "Great question about pricing! 💡 I can help you find properties within your budget. What's your price range and preferred location?"
-            ],
-            location: [
-                "We have properties in amazing destinations worldwide! 🌍 Are you looking for beach, city, mountain, or countryside locations?",
-                "I can help you explore fantastic locations! 🗺️ What type of destination appeals to you - urban, coastal, or rural?",
-                "Let's find the perfect location for you! 🎯 Are you interested in specific regions or types of destinations?"
-            ],
-            general: [
-                "That's an interesting question! Here's what I know: ...",
-                "Let me help you with that! ...",
-                "Here's some information: ...",
-                "I'm happy to answer any question you have!"
-            ]
-        };
-    }
-
-    async generate(intent, entities, context) {
-        try {
-            // First try Hugging Face API
-            const aiResponse = await this.callHuggingFaceAPI(intent, entities, context);
-            if (aiResponse) return aiResponse;
-        } catch (error) {
-            console.error('Hugging Face API failed:', error);
-        }
-
-        // Fallback to template-based response
-        return this.generateTemplateResponse(intent, entities, context);
-    }
-
-    async callHuggingFaceAPI(intent, entities, context) {
-        const apiKey = process.env.HUGGINGFACE_API_KEY;
-        
-        if (!apiKey) {
-            throw new Error('Hugging Face API key not configured');
-        }
-        
-        const models = [
-            'microsoft/DialoGPT-large',
-            'microsoft/DialoGPT-medium',
-            'facebook/blenderbot-400M-distill'
-        ];
-        
-        const contextMessages = context.messages.slice(-3).map(m => m.userMessage).join(' ');
-        const entityText = Object.entries(entities).map(([key, values]) => `${key}: ${values.join(', ')}`).join('; ');
-        
-        const prompt = `You are TravaCasa AI Assistant, an expert AI assistant who can answer any question, including travel, technology, science, math, general knowledge, and more. Be helpful, clear, and concise. Use emojis where appropriate to make responses engaging.\n\nUser: ${message}\nAI:`;
-        
-        for (const model of models) {
-            try {
-                const response = await axios.post(`https://api-inference.huggingface.co/models/${model}`, {
-                    inputs: prompt,
-                    parameters: {
-                        max_length: 150,
-                        temperature: 0.8,
-                        do_sample: true,
-                        top_p: 0.9,
-                        repetition_penalty: 1.2
-                    }
-                }, {
-                    headers: {
-                        'Authorization': `Bearer ${apiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    timeout: 8000
-                });
-                
-                if (response.data?.[0]?.generated_text) {
-                    let responseText = response.data[0].generated_text;
-                    const assistantIndex = responseText.lastIndexOf('TravaCasa Assistant:');
-                    if (assistantIndex !== -1) {
-                        responseText = responseText.substring(assistantIndex + 'TravaCasa Assistant:'.length).trim();
-                    }
-                    
-                    if (responseText && responseText.length > 20) {
-                        return responseText;
-                    }
-                }
-            } catch (error) {
-                console.error(`Model ${model} failed:`, error.message);
-                continue;
-            }
-        }
-        
-        throw new Error('All AI models failed');
-    }
-
-    generateTemplateResponse(intent, entities, context) {
-        const templates = this.templates[intent] || this.templates.general;
-        const template = templates[Math.floor(Math.random() * templates.length)];
-        
-        // Personalize with entities
-        if (entities.location) {
-            return template + ` I noticed you're interested in ${entities.location.join(', ')}. Let me help you find great options there!`;
-        }
-        
-        if (entities.propertyType) {
-            return template + ` I see you're looking for ${entities.propertyType.join(' or ')}. I can show you some excellent options!`;
-        }
-        
-        return template;
-    }
-}
-
-// Initialize Advanced AI System
-const advancedAI = new AdvancedChatbotAI();
-
 // Initialize LangChain Llama2 System
 let llama2Chain = null;
 let conversationMemory = new Map();
 
-// Initialize LangChain with Llama2
-async function initializeLangChainLlama2() {
+// Initialize Ollama Llama2 connection
+let ollamaClient = null;
+
+async function initializeOllamaLlama2() {
     try {
-        // Create Ollama ChatLlama2 instance
-        const llama2 = new ChatOllama({
-            baseUrl: process.env.OLLAMA_BASE_URL || "http://localhost:11434",
-            model: "llama2", // or "llama2:7b", "llama2:13b" etc.
-            temperature: 0.7,
-            maxTokens: 500,
-            topP: 0.9,
-        });
-
-        // Create prompt template for TravaCasa context
-        const promptTemplate = PromptTemplate.fromTemplate(`
-You are TravaCasa AI Assistant, an expert AI assistant who can answer any question, including travel, technology, science, math, general knowledge, and more. Be helpful, clear, and concise. Use emojis where appropriate to make responses engaging.
-
-Conversation Context: {context}
-
-User Question: {input}
-
-TravaCasa Assistant:`);
-
-        // Create the chain
-        llama2Chain = RunnableSequence.from([
-            promptTemplate,
-            llama2,
-            new StringOutputParser()
-        ]);
-
-        console.log('✅ LangChain with Llama2 initialized successfully!');
+        const baseUrl = process.env.OLLAMA_BASE_URL || "http://localhost:11434";
+        
+        // Test connection to Ollama
+        const testResponse = await fetch(`${baseUrl}/api/tags`);
+        if (!testResponse.ok) {
+            throw new Error(`Ollama server not accessible at ${baseUrl}`);
+        }
+        
+        const models = await testResponse.json();
+        const llama2Available = models.models && models.models.some(model => 
+            model.name.includes('llama2')
+        );
+        
+        if (!llama2Available) {
+            console.warn('⚠️ Llama2 model not found in Ollama. Available models:', models.models?.map(m => m.name) || []);
+        }
+        
+        ollamaClient = baseUrl;
+        console.log('✅ Ollama Llama2 connection initialized successfully!');
         return true;
     } catch (error) {
-        console.error('❌ Failed to initialize LangChain with Llama2:', error.message);
+        console.error('❌ Failed to initialize Ollama Llama2:', error.message);
         return false;
     }
 }
 
-// Call LangChain Llama2 function
-async function callLangChainLlama2(userMessage, sessionId = 'default') {
+// Call Ollama Llama2 function
+async function callOllamaLlama2(userMessage, sessionId = 'default', context = []) {
     try {
         // Initialize if not already done
-        if (!llama2Chain) {
-            const initialized = await initializeLangChainLlama2();
+        if (!ollamaClient) {
+            const initialized = await initializeOllamaLlama2();
             if (!initialized) {
-                throw new Error('LangChain Llama2 initialization failed');
+                throw new Error('Ollama Llama2 initialization failed');
             }
         }
 
         // Get conversation context
-        const context = getConversationContext(sessionId);
+        const conversationContext = getConversationContext(sessionId);
+        const recentContext = conversationContext.slice(-5); // Last 5 messages
         
-        // Prepare the input
-        const input = {
-            input: userMessage,
-            context: context.slice(-3).join('\n') // Last 3 messages for context
-        };
+        // Create the prompt with TravaCasa context
+        const prompt = `You are TravaCasa AI Assistant, an expert AI assistant for a travel and accommodation platform. You can answer questions about travel, properties, bookings, and general knowledge. Be helpful, clear, and concise. Use emojis where appropriate to make responses engaging.
 
-        // Call the chain
-        const response = await llama2Chain.invoke(input);
+${recentContext.length > 0 ? `Recent conversation context:
+${recentContext.join('\n')}
+
+` : ''}User Question: ${userMessage}
+
+TravaCasa Assistant:`;
+
+        // Call Ollama API
+        const response = await fetch(`${ollamaClient}/api/generate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: 'llama2',
+                prompt: prompt,
+                stream: false,
+                options: {
+                    temperature: 0.7,
+                    top_p: 0.9,
+                    max_tokens: 500
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.status}`);
+        }
+
+        const data = await response.json();
         
-        // Update conversation context
-        updateConversationContext(sessionId, `User: ${userMessage}`);
-        updateConversationContext(sessionId, `Assistant: ${response}`);
-        
-        return response;
+        if (!data.response) {
+            throw new Error('No response from Ollama');
+        }
+
+        return data.response.trim();
     } catch (error) {
-        console.error('LangChain Llama2 call failed:', error);
+        console.error('Ollama Llama2 call failed:', error);
         throw error;
     }
 }
@@ -1239,9 +1305,112 @@ function updateConversationContext(sessionId, message) {
     conversationMemory.set(sessionId, context);
 }
 
-// Legacy function for backward compatibility
-async function callHuggingFaceAPI(userMessage) {
-    return await advancedAI.processMessage(userMessage);
+// Enhanced Hugging Face API function with better error handling
+async function callHuggingFaceAPI(userMessage, fullPrompt = null) {
+    try {
+        // Check if Hugging Face API key is available
+        if (!process.env.HUGGINGFACE_API_KEY) {
+            throw new Error('Hugging Face API key not configured');
+        }
+
+        // Use a better model for text generation - meta-llama/Llama-2-7b-chat-hf or gpt2 for faster response
+        // Using a more reliable endpoint and model
+        const modelUrl = 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-large';
+        
+        // Use the full prompt if available, otherwise just the user message
+        const inputText = fullPrompt || userMessage;
+        
+        const response = await fetch(modelUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                inputs: inputText,
+                parameters: {
+                    max_new_tokens: 200,
+                    temperature: 0.7,
+                    top_p: 0.9,
+                    return_full_text: false
+                },
+                options: {
+                    wait_for_model: true // Wait for model to load if needed
+                }
+            })
+        });
+
+        // Handle different response statuses
+        if (response.status === 503) {
+            // Model is loading, wait and retry once
+            console.log('⏳ Hugging Face model is loading, waiting...');
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            
+            const retryResponse = await fetch(modelUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    inputs: inputText,
+                    parameters: {
+                        max_new_tokens: 200,
+                        temperature: 0.7,
+                        return_full_text: false
+                    },
+                    options: {
+                        wait_for_model: true
+                    }
+                })
+            });
+            
+            if (!retryResponse.ok) {
+                throw new Error(`Hugging Face API error: ${retryResponse.status} - Model may still be loading`);
+            }
+            
+            const retryData = await retryResponse.json();
+            return processHuggingFaceResponse(retryData, userMessage);
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Hugging Face API error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        return processHuggingFaceResponse(data, userMessage);
+        
+    } catch (error) {
+        console.error('❌ Hugging Face API call failed:', error.message);
+        // Don't throw, return null so caller can use other fallback
+        return null;
+    }
+}
+
+// Helper function to process Hugging Face API response
+function processHuggingFaceResponse(data, originalMessage) {
+    // Handle different response formats
+    if (Array.isArray(data) && data.length > 0) {
+        // Format: [{ generated_text: "..." }]
+        if (data[0].generated_text) {
+            return data[0].generated_text.trim();
+        }
+    } else if (data.generated_text) {
+        // Format: { generated_text: "..." }
+        return data.generated_text.trim();
+    } else if (data[0] && typeof data[0] === 'string') {
+        // Format: ["generated text"]
+        return data[0].trim();
+    } else if (data.error) {
+        // API returned an error
+        console.error('Hugging Face API error:', data.error);
+        return null;
+    }
+    
+    // If we can't parse the response, return null
+    console.warn('⚠️ Unexpected Hugging Face response format:', JSON.stringify(data).substring(0, 200));
+    return null;
 }
 
 // Enhanced contextual response function with comprehensive coverage
@@ -1348,3 +1517,4 @@ app.use((err, req, res, next) => {
     res.status(statusCode).send(message); // Send the error status and message
     console.error(err.stack); // Log the error stack for debugging
 });
+

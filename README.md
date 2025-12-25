@@ -32,7 +32,7 @@ TravaCasa is a full-featured travel and accommodation platform powered by an adv
   - Local: Llama2 via LangChain/Ollama (http://localhost:11434)
   - Cloud fallback: Hugging Face (DialoGPT, Blenderbot)
 - **Other:**
-  - Multer (file uploads), Google Maps API (location/places), Passport.js (auth)
+  - Cloudinary (image storage), Multer (file uploads), Google Maps API (location/places), Passport.js (auth)
 
 ---
 
@@ -48,13 +48,27 @@ TravaCasa is a full-featured travel and accommodation platform powered by an adv
    ```
 3. **Environment variables:**
    - Create a `.env` file in the root with:
-     ```
-     MONGODB_URI=your_mongodb_uri
-     SESSION_SECRET=your_secret
-     HUGGINGFACE_API_KEY=your_hf_key
-     OLLAMA_BASE_URL=http://localhost:11434
-     GOOGLE_MAPS_API_KEY=your_google_maps_key
-     ```
+           ```
+      ATLASDB_URL=your_mongodb_atlas_connection_string
+      SECRET=your_session_secret_key
+      GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+      CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+      CLOUDINARY_API_KEY=your_cloudinary_api_key
+      CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+      OLLAMA_BASE_URL=http://localhost:11434
+      HUGGINGFACE_API_KEY=your_huggingface_api_key
+      ```
+       - **Cloudinary Setup:**
+      - Sign up at [Cloudinary](https://cloudinary.com/)
+      - Get your cloud name, API key, and API secret from your dashboard
+      - Add them to your `.env` file
+    - **Ollama Setup (for local Llama2):**
+      - Install Ollama from [ollama.ai](https://ollama.ai/)
+      - Run `ollama pull llama2` to download the model
+      - Start Ollama server: `ollama serve`
+    - **Hugging Face Setup (backup):**
+      - Get API key from [Hugging Face](https://huggingface.co/settings/tokens)
+      - Add to your `.env` file
 4. **Start your local Llama2 server (Ollama, llama.cpp, etc.)**
    - Example for Ollama:
      ```bash
